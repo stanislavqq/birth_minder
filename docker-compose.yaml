@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  database:
+    image: postgres:${POSTGRES_VERSION:-13}-alpine
+    environment:
+      POSTGRES_DB: postgres
+      # You should definitely change the password in production
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+    volumes:
+      - ../db/postgres/data:/var/lib/postgresql/data
+
+
+networks:
+  default:
+    external:
+      name: dev
