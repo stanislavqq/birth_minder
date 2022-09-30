@@ -1,7 +1,7 @@
 package main
 
 import (
-	"BMinder/Bot"
+	"BMinder/src/Bot"
 	"database/sql"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -43,7 +43,17 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	bot := Bot.Create(os.Getenv("BOT_TOKEN"))
+	cfg := Bot.Config{
+		Token: os.Getenv("BOT_TOKEN"),
+		Debug: true,
+	}
+
+	bot, err := Bot.Create(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	bot.ListenCommands(ComanndStart)
 
 	db, err := sql.Open("sqlite3", "./database.sqlite")
 
@@ -51,8 +61,6 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-
-	bot.Debug = true
 	//var users []BDUser
 
 	for rows.Next() {
@@ -68,29 +76,6 @@ func main() {
 
 	rows.Close()
 	defer db.Close()
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	updates := bot.GetUpdatesChan(u)
-
-	for update := range updates {
-		if update.Message != nil && update.Message.IsCommand() {
-			fmt.Println(update.Message.IsCommand(), update.Message.Text)
-			if update.Message.Text == "/start" {
-				stmt, err := db.Prepare("INSERT INTO accounts(id) VALUES(?)")
-				checkErr(err)
-				fmt.Println(update.Message.From.ID)
-				res, err := stmt.Exec(update.Message.From.ID)
-				checkErr(err)
-
-				id, err := res.LastInsertId()
-				checkErr(err)
-
-				fmt.Println(id)
-				message := tgbotapi.NewMessage(update.Message.Chat.ID, "Success register!")
-				bot.Send(message)
-			}
-		}
-	}
 
 }
 
@@ -119,10 +104,4 @@ func getTest() string {
 		res = res + "\n" + strconv.Itoa(id) + name
 	}
 	return res
-}
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
