@@ -2,9 +2,12 @@ package main
 
 import (
 	"BMinder/src/services/botservice"
+	"BMinder/src/services/notifier"
+	"BMinder/src/services/observer"
 	"github.com/jackc/pgx"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/robfig/cron/v3"
 	"log"
 	"os"
 )
@@ -24,11 +27,20 @@ func main() {
 		panic(err)
 	}
 
-	bot.SendTextToChat(264979026, "Test!")
+	notifyService := notifier.New()
+	notifyService.SetObserver(&observer.TGObserver{Bot: bot})
+
+	c := cron.New()
+	_, err = c.AddFunc("@every 30m", func() {
+		notifyService.Notify(264979026, "test notify")
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	c.Start()
 
 	botservice.ListenCommands(bot)
-	//db, err := sql.Open("sqlite3", "./database.sqlite")
-
 }
 
 //

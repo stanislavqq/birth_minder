@@ -6,5 +6,5 @@ type CommandStart struct {
 }
 
 func (c *CommandStart) Execute() {
-	fmt.Print("Executed!")
+	fmt.Print("\nExecuted!")
 }

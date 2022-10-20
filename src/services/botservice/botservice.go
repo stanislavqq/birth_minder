@@ -6,7 +6,23 @@ import (
 	"strings"
 )
 
-func ListenCommands(bot Bot) {
+type BotService struct {
+	botapi tgbotapi.BotAPI
+}
+
+func NewBot(token string) (BotService, error) {
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		return BotService{}, err
+	}
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	return BotService{botapi: *bot}, nil
+}
+
+func ListenCommands(bot BotService) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -26,4 +42,9 @@ func ListenCommands(bot Bot) {
 			}
 		}
 	}
+}
+
+func (b *BotService) SendTextToChat(ChatID int64, message string) {
+	messageConf := tgbotapi.NewMessage(ChatID, message)
+	b.botapi.Send(messageConf)
 }
