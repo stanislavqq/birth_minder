@@ -1,0 +1,16 @@
+database:
+  enabled: true
+  host: 127.0.0.1
+  name: name
+  port: 5432
+  user: dev_user
+  password: dev_user
+  migrations: migrations
+  sslmode: disable
+  driver: postgres
+
+project:
+  debug: true
+
+tgbot:
+  token:
