@@ -5,9 +5,9 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func NewJob(repository *bevent.Repository, logger zerolog.Logger) *NotifyJob {
-	return &NotifyJob{
+func NewJob(repository *bevent.Repository, logger zerolog.Logger) *Job {
+	return &Job{
 		logger:   logger,
-		eventRep: *repository,
+		eventRep: repository,
 	}
 }

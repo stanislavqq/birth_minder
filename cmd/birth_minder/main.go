@@ -55,7 +55,9 @@ func main() {
 	rep := bevent.NewRepository(db, logger)
 	job := notify.NewJob(rep, logger)
 	job.Run()
-	_, err = c.AddJob("@every 5s", job)
+	_, err = c.AddFunc("@every 5s", func() {
+		job.Run()
+	})
 	if err != nil {
 		panic(err)
 	}

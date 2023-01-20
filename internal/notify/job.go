@@ -7,23 +7,19 @@ import (
 	"time"
 )
 
-type NotifyJob struct {
+type Job struct {
 	logger   zerolog.Logger
-	eventRep bevent.Repository
+	eventRep *bevent.Repository
 }
 
-func (j *NotifyJob) Run() {
+func (j *Job) Run() {
+	duration := (7 * 24) * time.Hour
 
-	now := time.Now()
-	duration, err := time.ParseDuration("7d")
-	if err != nil {
-		return
+	rules := bevent.Rules{
+		bevent.NewTimeRule(duration),
 	}
-	searchDate := now.Add(duration)
 
-	fmt.Println(searchDate.Format("DD.MM.YY"))
-
-	eventList, err := j.eventRep.GetList()
+	eventList, err := j.eventRep.GetListWithRule(rules)
 	if err != nil {
 		j.logger.Err(err).Msg("Не удалось получить список записей")
 	}
