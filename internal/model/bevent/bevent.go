@@ -16,3 +16,7 @@ type BirthEvent struct {
 	Comment   sql.NullString `db:"comment"`
 	AccountID int32          `db:"account_id"`
 }
+
+func (e *BirthEvent) GetFullName() string {
+	return e.FirstName + " " + e.LastName
+}
