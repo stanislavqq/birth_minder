@@ -7,10 +7,6 @@ import (
 
 var cfg *Config
 
-type Project struct {
-	Debug bool `yaml:"debug"`
-}
-
 type Database struct {
 	Enabled    bool   `yaml:"enabled"`
 	Host       string `yaml:"host"`
@@ -24,12 +20,13 @@ type Database struct {
 }
 
 type TGBot struct {
-	Token string `yaml:"token"`
+	Token      string `yaml:"token"`
+	NotifyChat int    `yaml:"notifyChat"`
 }
 
 type Config struct {
+	Debug    bool     `yaml:"debug"`
 	Database Database `yaml:"database"`
-	Project  Project  `yaml:"project"`
 	TGBot    TGBot    `yaml:"tgbot"`
 }
 
