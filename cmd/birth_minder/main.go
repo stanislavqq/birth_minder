@@ -3,11 +3,9 @@ package main
 import (
 	"BMinder/internal/config"
 	"BMinder/internal/database"
-	bevent "BMinder/internal/model/bvent"
+	bevent "BMinder/internal/model/bevent"
 	"BMinder/internal/notify"
-	"BMinder/src/services/botservice"
-	"BMinder/src/services/notifier"
-	"BMinder/src/services/observer"
+	"BMinder/internal/telegram"
 	"flag"
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
@@ -26,7 +24,7 @@ func main() {
 	cfg := config.GetConfigInstance()
 	logger := log.With().Logger()
 
-	if cfg.Project.Debug {
+	if cfg.Debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
@@ -43,26 +41,27 @@ func main() {
 		return
 	}
 
-	bot, err := botservice.NewBot(cfg.TGBot.Token)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Ошибка инициализации бота")
-	}
-
-	notifyService := notifier.New()
-	notifyService.SetObserver(&observer.TGObserver{Bot: bot})
+	notifyCollector := make(chan notify.Notify)
 
 	c := cron.New()
 	rep := bevent.NewRepository(db, logger)
-	job := notify.NewJob(rep, logger)
-	job.Run()
-	_, err = c.AddFunc("@every 5s", func() {
+	job := notify.NewJob(rep, notifyCollector, logger)
+
+	_, err := c.AddFunc("@every 5s", func() {
 		job.Run()
 	})
 	if err != nil {
 		panic(err)
 	}
-	defer c.Stop()
-	c.Start()
 
-	botservice.ListenCommands(bot)
+	provider := telegram.New(cfg.TGBot, logger)
+	worker := notify.NewWorker(notifyCollector, provider, logger)
+
+	defer func() {
+		c.Stop()
+		worker.Stop()
+	}()
+
+	c.Start()
+	worker.Start()
 }
