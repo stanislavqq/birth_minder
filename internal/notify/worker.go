@@ -1,7 +1,11 @@
 package notify
 
 import (
+	"context"
 	"github.com/rs/zerolog"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 type NotifyWorker struct {
@@ -18,14 +22,28 @@ func NewWorker(notifyCollector chan Notify, provider NotifyProvider, logger zero
 	}
 }
 
-func (w *NotifyWorker) Start() {
+func (w *NotifyWorker) Start() error {
+	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
 		w.logger.Log().Msg("Notify worker is running")
 		if err := w.listenNotifyMessages(); err != nil {
 			w.logger.Error().Err(err).Msg("Failed running notify worker")
+			cancel()
 		}
 	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case v := <-quit:
+		w.logger.Info().Msgf("signal.Notify: %v", v)
+	case done := <-ctx.Done():
+		w.logger.Info().Msgf("ctx.Done: %v", done)
+	}
+
+	return nil
 }
 
 func (w *NotifyWorker) listenNotifyMessages() error {
