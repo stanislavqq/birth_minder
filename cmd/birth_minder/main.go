@@ -47,7 +47,7 @@ func main() {
 	rep := bevent.NewRepository(db, logger)
 	job := notify.NewJob(rep, notifyCollector, cfg.Debug, logger)
 
-	_, err := c.AddFunc("@every 5s", func() {
+	_, err := c.AddFunc("@daily", func() {
 		job.Run()
 	})
 	if err != nil {
