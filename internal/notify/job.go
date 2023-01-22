@@ -14,13 +14,15 @@ type Job struct {
 	logger     zerolog.Logger
 	eventRep   *bevent.Repository
 	NotifyChan chan Notify
+	debug      bool
 }
 
-func NewJob(repository *bevent.Repository, collector chan Notify, logger zerolog.Logger) *Job {
+func NewJob(repository *bevent.Repository, collector chan Notify, debug bool, logger zerolog.Logger) *Job {
 	return &Job{
 		logger:     logger,
 		eventRep:   repository,
 		NotifyChan: collector,
+		debug:      debug,
 	}
 }
 
@@ -35,7 +37,9 @@ func (j *Job) Run() {
 		}
 
 		if len(eventList) > 0 {
-			j.logger.Debug().Dur("interval event", interval).Fields(eventList).Msg("Фигачим в работу события")
+			if j.debug {
+				j.logger.Debug().Dur("interval event", interval).Fields(eventList).Msg("Фигачим в работу события")
+			}
 			toChan(eventList, interval, j.NotifyChan)
 		}
 		eventList = bevent.BirthEvents{}

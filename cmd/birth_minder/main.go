@@ -41,27 +41,24 @@ func main() {
 		return
 	}
 
-	notifyCollector := make(chan notify.Notify)
+	notifyCollector := make(chan notify.Notify, 1)
 
 	c := cron.New()
 	rep := bevent.NewRepository(db, logger)
-	job := notify.NewJob(rep, notifyCollector, logger)
+	job := notify.NewJob(rep, notifyCollector, cfg.Debug, logger)
 
-	_, err := c.AddFunc("@daily", func() {
+	_, err := c.AddFunc("@every 5s", func() {
 		job.Run()
 	})
 	if err != nil {
 		panic(err)
 	}
+	defer c.Stop()
+	c.Start()
 
 	provider := telegram.New(cfg.TGBot, logger)
-	worker := notify.NewWorker(notifyCollector, provider, logger)
-
-	defer func() {
-		c.Stop()
-		worker.Stop()
-	}()
-
-	worker.Start()
-	c.Start()
+	err = notify.NewWorker(notifyCollector, provider, logger).Start()
+	if err != nil {
+		logger.Error().Err(err).Msg("Не удалось запустить воркер")
+	}
 }
