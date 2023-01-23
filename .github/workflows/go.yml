@@ -45,7 +45,7 @@ jobs:
           go-version: 1.19
 
       - name: Build
-        run: go mod download && CGO_ENABLED=0 go build -o ./bin/bminder_app ./cmd/birth_minder/main.go
+        run: go build -o ./bin/bminder_app ./cmd/birth_minder/main.go
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
