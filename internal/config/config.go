@@ -25,9 +25,10 @@ type TGBot struct {
 }
 
 type Config struct {
-	Debug    bool     `yaml:"debug"`
-	Database Database `yaml:"database"`
-	TGBot    TGBot    `yaml:"tgbot"`
+	Debug         bool     `yaml:"debug"`
+	FormatMessage string   `yaml:"formatMessage"`
+	Database      Database `yaml:"database"`
+	TGBot         TGBot    `yaml:"tgbot"`
 }
 
 func GetConfigInstance() *Config {
