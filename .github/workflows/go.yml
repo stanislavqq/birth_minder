@@ -30,17 +30,18 @@ jobs:
     - name: Test
       run: CGO_ENABLED=0 go test -v -timeout 30s -coverprofile cover.out ./...
 
+
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - name: deploy on server
-        uses: appleboy/ssh-action@master
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
         with:
-          local: ./bin/bminder_app
-          remote: /home/${{ secrets.SERVER_USERNAME }}/application/bminder_app
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+      - name: Deploy with rsync
+        run: rsync -avz ./bin/bminder_app ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.SERVER_USERNAME }}/application/bminder_app
