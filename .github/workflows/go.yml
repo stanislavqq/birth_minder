@@ -25,7 +25,7 @@ jobs:
 #      run: go get
 
     - name: Build
-      run: go build -v ./cmd/birth_minder/main.go
+      run: go mod download && CGO_ENABLED=0 go build -o ./bin/bminder_app ./cmd/birth_minder/main.go
 
     - name: Test
       run: CGO_ENABLED=0 go test -v -timeout 30s -coverprofile cover.out ./...
@@ -39,11 +39,8 @@ jobs:
       - name: deploy on server
         uses: appleboy/ssh-action@master
         with:
+          local: ./bin/bminder_app
+          remote: /home/${{ secrets.SERVER_USERNAME }}/application/bminder_app
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
-          script: |
-            cd /home/${{ secrets.SERVER_USERNAME }}/application
-            git checkout .
-            git pull
-            go build /home/${{ secrets.SERVER_USERNAME }}/application/cmd/birth_minder/main.go
