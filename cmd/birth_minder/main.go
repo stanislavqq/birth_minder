@@ -11,7 +11,11 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"time"
 )
+
+const day = time.Hour * 24
+const week = day * 7
 
 func main() {
 	if err := config.ReadConfigYML("config.yml"); err != nil {
@@ -45,7 +49,7 @@ func main() {
 
 	c := cron.New()
 	rep := bevent.NewRepository(db, logger)
-	job := notify.NewJob(rep, notifyCollector, cfg.Debug, logger)
+	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
 
 	cronRule := "@daily"
 
