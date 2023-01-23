@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -21,8 +21,29 @@ jobs:
       with:
         go-version: 1.19
 
+    - name: Install dependencies
+      run: go get
+
     - name: Build
       run: go build -v ./cmd/birth_minder/main.go
 
     - name: Test
       run: CGO_ENABLED=0 go test -v -timeout 30s -coverprofile cover.out ./...
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: deploy on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            cd /home/${{ secrets.SERVER_USERNAME }}/application
+            git checkout .
+            git pull
+            go build /home/${{ secrets.SERVER_USERNAME }}/application/cmd/birth_minder/main.go
