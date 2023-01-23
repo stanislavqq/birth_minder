@@ -4,33 +4,34 @@ import (
 	bevent "BMinder/internal/model/bevent"
 	"fmt"
 	"github.com/rs/zerolog"
+	"math"
+	"strings"
 	"time"
 )
 
-const day = time.Hour * 24
-const week = day * 7
-
-type Job struct {
-	logger     zerolog.Logger
-	eventRep   *bevent.Repository
-	NotifyChan chan Notify
-	debug      bool
+type FindNotifyJob struct {
+	logger        zerolog.Logger
+	eventRep      *bevent.Repository
+	notifyTimes   []time.Duration
+	messageFormat string
+	NotifyChan    chan Notify
+	debug         bool
 }
 
-func NewJob(repository *bevent.Repository, collector chan Notify, debug bool, logger zerolog.Logger) *Job {
-	return &Job{
-		logger:     logger,
-		eventRep:   repository,
-		NotifyChan: collector,
-		debug:      debug,
+func NewJob(repository *bevent.Repository, messageFormat string, notifyTimes []time.Duration, collector chan Notify, debug bool, logger zerolog.Logger) *FindNotifyJob {
+	return &FindNotifyJob{
+		logger:        logger,
+		eventRep:      repository,
+		NotifyChan:    collector,
+		debug:         debug,
+		notifyTimes:   notifyTimes,
+		messageFormat: messageFormat,
 	}
 }
 
-func (j *Job) Run() {
+func (j *FindNotifyJob) Run() {
 
-	intervals := []time.Duration{day, week}
-
-	for _, interval := range intervals {
+	for _, interval := range j.notifyTimes {
 		eventList, err := j.findBirthEventByDuration(interval)
 		if err != nil {
 			j.logger.Err(err).Dur("interval event", interval).Msg("Не удалось получить список событий по промежутку времени")
@@ -40,38 +41,68 @@ func (j *Job) Run() {
 			if j.debug {
 				j.logger.Debug().Dur("interval event", interval).Fields(eventList).Msg("Фигачим в работу события")
 			}
-			go toChan(eventList, interval, j.NotifyChan)
+
+			for _, event := range eventList {
+				notify := makeNotify(event, interval, j.messageFormat)
+				go notifyToChan(notify, j.NotifyChan)
+			}
 		}
 		eventList = bevent.BirthEvents{}
 	}
 }
 
-func toChan(eventList bevent.BirthEvents, interval time.Duration, notifyPipe chan Notify) {
-	for _, event := range eventList {
-		afterTime := durationToStringFormat(interval)
-		msg := fmt.Sprintf("🎉🎉🎉Напоминание: \n\n У %s - %s будет День рождения.", event.GetFullName(), afterTime)
-		notif := NewNotify(msg, interval)
-		notifyPipe <- notif
-
-		time.Sleep(time.Second)
-	}
-}
-
-func durationToStringFormat(duration time.Duration) string {
-	var res string
-	switch duration {
-	case day:
-		res = "завтра"
-	case week:
-		res = "через неделю"
-	default:
-		res = fmt.Sprintf("через %sч", duration.Hours())
+func parseFormatMessage(format string, params map[string]string) string {
+	res := format
+	for key, value := range params {
+		res = strings.ReplaceAll(res, "{"+key+"}", value)
 	}
 
 	return res
 }
 
-func (j *Job) findBirthEventByDuration(duration time.Duration) (bevent.BirthEvents, error) {
+func makeNotify(event bevent.BirthEvent, interval time.Duration, formatMessage string) Notify {
+	afterTime := durationToStringFormat(interval)
+
+	msg := parseFormatMessage(formatMessage, map[string]string{
+		"fullname":  event.GetFullName(),
+		"firstname": event.FirstName,
+		"lastname":  event.LastName,
+		"soon_time": afterTime,
+	})
+	//msg := fmt.Sprintf("🎉🎉🎉Напоминание: \n\n У %s - %s будет День рождения.", event.GetFullName(), afterTime)
+	return NewNotify(msg, interval)
+}
+
+func notifyToChan(notify Notify, notifyPipe chan Notify) {
+	notifyPipe <- notify
+	time.Sleep(time.Second)
+}
+
+func durationToStringFormat(duration time.Duration) string {
+	var res string
+	switch duration {
+	case time.Hour * 24:
+		res = "завтра"
+	case time.Hour * 24 * 2:
+		res = "после завтра"
+	case time.Hour * 24 * 7:
+		res = "через неделю"
+	default:
+		//week := time.Hour * 24 * 7
+
+		days := int(math.Round(duration.Hours() / 24))
+		if weeks := days / 7; days%7 == 0 && weeks < 4 {
+			res = fmt.Sprintf("через %d недели", weeks)
+		} else {
+			res = fmt.Sprintf("через %d дней", days)
+		}
+
+	}
+
+	return res
+}
+
+func (j *FindNotifyJob) findBirthEventByDuration(duration time.Duration) (bevent.BirthEvents, error) {
 	paramDay, paramMonth := j.getDayMonthFromDuration(duration)
 	eventList, err := j.eventRep.GetListByDayMonth(paramDay, paramMonth)
 	if err != nil {
@@ -81,7 +112,7 @@ func (j *Job) findBirthEventByDuration(duration time.Duration) (bevent.BirthEven
 	return eventList, err
 }
 
-func (j *Job) getDayMonthFromDuration(duration time.Duration) (int, int) {
+func (j *FindNotifyJob) getDayMonthFromDuration(duration time.Duration) (int, int) {
 	now := time.Now()
 	timeTarget := now.Add(duration)
 
