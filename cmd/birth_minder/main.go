@@ -41,13 +41,20 @@ func main() {
 		return
 	}
 
-	notifyCollector := make(chan notify.Notify, 1)
+	notifyCollector := make(chan notify.Notify)
 
 	c := cron.New()
 	rep := bevent.NewRepository(db, logger)
 	job := notify.NewJob(rep, notifyCollector, cfg.Debug, logger)
 
-	_, err := c.AddFunc("@daily", func() {
+	cronRule := "@daily"
+
+	if cfg.Debug {
+		job.Run()
+		cronRule = "@every 10s"
+	}
+
+	_, err := c.AddFunc(cronRule, func() {
 		job.Run()
 	})
 	if err != nil {

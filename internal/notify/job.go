@@ -40,7 +40,7 @@ func (j *Job) Run() {
 			if j.debug {
 				j.logger.Debug().Dur("interval event", interval).Fields(eventList).Msg("Фигачим в работу события")
 			}
-			toChan(eventList, interval, j.NotifyChan)
+			go toChan(eventList, interval, j.NotifyChan)
 		}
 		eventList = bevent.BirthEvents{}
 	}

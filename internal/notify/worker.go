@@ -24,18 +24,17 @@ func NewWorker(notifyCollector chan Notify, provider NotifyProvider, logger zero
 
 func (w *NotifyWorker) Start() error {
 	ctx, cancel := context.WithCancel(context.Background())
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		w.logger.Log().Msg("Notify worker is running")
+		w.logger.Info().Msg("Notify worker is running")
 		if err := w.listenNotifyMessages(); err != nil {
 			w.logger.Error().Err(err).Msg("Failed running notify worker")
 			w.stop()
 			cancel()
 		}
 	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	select {
 	case v := <-quit:
