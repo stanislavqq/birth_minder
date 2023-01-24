@@ -116,4 +116,4 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: | 
             cd /home/${{ secrets.SERVER_USERNAME }}/application
-            ./${{ env.BUILD_APP_NAME }} --migrations
+            ./${{ env.BUILD_APP_NAME }} -migrations
