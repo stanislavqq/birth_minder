@@ -9,6 +9,7 @@ on:
 env:
   DEPLOY_PATH: /home/${{ secrets.SERVER_USERNAME }}/application
   BUILD_PATH: bin
+  BUILD_APP_NAME: bminder
 
 jobs:
   build:
@@ -21,7 +22,7 @@ jobs:
           go-version: 1.19
 
       - name: Build
-        run: go mod download && CGO_ENABLED=0 go build -o ./bin/bminder ./cmd/birth_minder/main.go
+        run: go mod download && CGO_ENABLED=0 go build -o ./bin/${{ BUILD_APP_NAME }} ./cmd/birth_minder/main.go
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -44,6 +45,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build, test]
+    env:
+      APP_FORMAT_MSG: "🎉🎉🎉\nНапоминание: \n\n {fullname} {soon_time}"
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+      TG_TOKEN: ${{ secrets.TG_TOKEN }}
+      TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -69,6 +80,33 @@ jobs:
       - name: Deploy with rsync
         run: rsync -avzr --rsh=ssh ${{ env.BUILD_PATH }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}
 
+      - name: Copy migrations
+        run: rsync -avzr --rsh=ssh migrations ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}
+
+      - name: Create config
+        run: |
+          echo "
+          debug: false
+          formatMessage: ${{ env.APP_FORMAT_MSG }}
+          
+          database:
+            enabled: true
+            host: ${{ env.DB_HOST }}
+            name: ${{ env.DB_NAME }}
+            port: ${{ env.DB_PORT }}
+            user: ${{ env.DB_USER }}
+            password: ${{ env.DB_PASS }}
+            migrations: migrations
+            sslmode: disable
+            driver: postgres
+          
+          tgbot:
+            token: ${{ env.TG_TOKEN }}
+            notifyChat: ${{ env.TG_CHAT_ID }}" > config.yml
+
+      - name: Copy config
+        run: rsync -avzP --rsh=ssh config.yml ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}/config.yml
+
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -77,5 +115,6 @@ jobs:
           key: ${{ secrets.SSH_SECRET_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: | 
-            whoami
-            ls -la /home/${{ secrets.SERVER_USERNAME }}/application/
+            cd /home/${{ secrets.SERVER_USERNAME }}/application
+            ./${{ BUILD_APP_NAME }} --migrations
+            rm -r ./migrations
