@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, test]
     env:
-      APP_FORMAT_MSG: "🎉🎉🎉\nНапоминание: \n\n {fullname} {soon_time}"
+      APP_FORMAT_MSG: "🎉🎉🎉\\nНапоминание: \\n\\n {fullname} {soon_time}"
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_PORT: ${{ secrets.DB_PORT }}
@@ -117,4 +117,3 @@ jobs:
           script: | 
             cd /home/${{ secrets.SERVER_USERNAME }}/application
             ./${{ env.BUILD_APP_NAME }} --migrations
-            rm -r ./migrations
