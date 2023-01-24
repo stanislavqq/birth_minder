@@ -87,7 +87,7 @@ jobs:
         run: |
           echo "
           debug: false
-          formatMessage: ${{ env.APP_FORMAT_MSG }}
+          formatMessage: \"${{ env.APP_FORMAT_MSG }}\"
           
           database:
             enabled: true
