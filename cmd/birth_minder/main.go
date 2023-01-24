@@ -33,9 +33,14 @@ func main() {
 	}
 
 	db, dbErr := database.NewDatabase(cfg.Database, logger)
-
 	if dbErr != nil {
 		log.Fatal().Err(dbErr).Msg("Ошибка подключения к БД")
+	}
+
+	pingErr := db.Ping()
+	if pingErr != nil {
+		log.Fatal().Err(dbErr).Msg("Ошибка ping к БД")
+		return
 	}
 
 	if *migrations {
