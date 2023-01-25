@@ -104,5 +104,7 @@ jobs:
             export TG_TOKEN=${{ env.TG_TOKEN }}
             export TG_CHAT_ID=${{ env.TG_CHAT_ID }}
             
+            env
+            
             cd /home/${{ secrets.SERVER_USERNAME }}/application
             ./${{ env.BUILD_APP_NAME }} -migration
