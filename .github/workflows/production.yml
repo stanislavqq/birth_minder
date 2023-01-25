@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.19
+          cache: true
 
       - name: Build
         run: go mod download && CGO_ENABLED=0 go build -o ./bin/${{ env.BUILD_APP_NAME }} ./cmd/birth_minder/main.go
@@ -96,15 +97,15 @@ jobs:
           key: ${{ secrets.SSH_SECRET_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: | 
-            export DEBUG_MODE=${{ env.DEBUG_MODE }}
-            export DB_HOST=${{ env.DB_HOST }}
-            export DB_NAME=${{ env.DB_NAME }}
-            export DB_PORT=${{ env.DB_PORT }}
-            export DB_USER=${{ env.DB_USER }}
-            export DB_PASS=${{ env.DB_PASS }}
-            export TG_TOKEN=${{ env.TG_TOKEN }}
-            export TG_CHAT_ID=${{ env.TG_CHAT_ID }}
-            
+            echo "export DEBUG_MODE=${{ env.DEBUG_MODE }}" >> ~/.bash_exports 
+            echo "export DB_HOST=${{ env.DB_HOST }}" >> ~/.bash_exports
+            echo "export DB_NAME=${{ env.DB_NAME }}" >> ~/.bash_exports
+            echo "export DB_PORT=${{ env.DB_PORT }}" >> ~/.bash_exports
+            echo "export DB_USER=${{ env.DB_USER }}"  >> ~/.bash_exports
+            echo "export DB_PASS=${{ env.DB_PASS }}"  >> ~/.bash_exports
+            echo "export TG_TOKEN=${{ env.TG_TOKEN }}"  >> ~/.bash_exports
+            echo "export TG_CHAT_ID=${{ env.TG_CHAT_ID }}"  >> ~/.bash_exports
+            source ~/.bashrc
             env
             
             cd /home/${{ secrets.SERVER_USERNAME }}/application
