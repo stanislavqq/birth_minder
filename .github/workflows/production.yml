@@ -16,6 +16,9 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
+      - name: tests
+        run: ls ./ -la && ls ../ -la
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
