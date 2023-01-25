@@ -18,13 +18,14 @@ const day = time.Hour * 24
 const week = day * 7
 
 func main() {
-	if err := config.ReadConfigYML("config.yml"); err != nil {
-		log.Fatal().Err(err).Msg("Failed init configuration")
-	}
-
 	migrations := flag.Bool("migration", false, "Define migrations start option")
 	debug := flag.Bool("debug", false, "Define debug mode option")
+	configFile := flag.String("file", "config.yml", "Set path config file")
 	flag.Parse()
+
+	if err := config.ReadConfigYML(*configFile); err != nil {
+		log.Fatal().Err(err).Msg("Failed init configuration")
+	}
 
 	cfg := config.GetConfigInstance()
 	logger := log.With().Logger()
@@ -34,6 +35,7 @@ func main() {
 	}
 
 	if cfg.Debug {
+		log.Debug().Int("NotifyChat", cfg.TGBot.NotifyChat).Msg("NotifyChat")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
