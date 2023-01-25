@@ -82,36 +82,15 @@ jobs:
           name: build-files
           path: ${{ env.BUILD_PATH }}
 
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          if_key_exists: ignore
-          key: ${{ secrets.SSH_SECRET_KEY }}
-          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
-
       - name: test
         run: ls -la ~
 
-      - name: Adding Known Hosts
-        run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-
-      - name: Deploy with rsync
-        run: cp -R ${{ env.BUILD_PATH }} ${{ env.DEPLOY_PATH }}/${{ env.BUILD_PATH }}
-
-      - name: Copy migrations
-        run: cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
-
-      - name: Copy config
-        run: cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
-
-      - name: executing remote ssh commands
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_SECRET_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: | 
+      - name: commands
+        run: |
+            cp -R ${{ env.BUILD_PATH }} ${{ env.DEPLOY_PATH }}/${{ env.BUILD_PATH }}
+            cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
+            cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
+          
             echo "export DEBUG_MODE=${{ env.DEBUG_MODE }}" >> ~/.bash_exports 
             echo "export DB_HOST=${{ env.DB_HOST }}" >> ~/.bash_exports
             echo "export DB_NAME=${{ env.DB_NAME }}" >> ~/.bash_exports
