@@ -46,7 +46,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, test]
     env:
-      APP_FORMAT_MSG: "🎉🎉🎉\\nНапоминание: \\n\\n {fullname} {soon_time}"
+      APP_FORMAT_MSG: "🎉🎉🎉\\nНапоминание о днюхе: \\n\\n {fullname} :: {soon_time}"
+      DEBUG_MODE: false
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_PORT: ${{ secrets.DB_PORT }}
@@ -83,29 +84,8 @@ jobs:
       - name: Copy migrations
         run: rsync -avzr --rsh=ssh migrations ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}
 
-      - name: Create config
-        run: |
-          echo "
-          debug: false
-          formatMessage: \"${{ env.APP_FORMAT_MSG }}\"
-          
-          database:
-            enabled: true
-            host: ${{ env.DB_HOST }}
-            name: ${{ env.DB_NAME }}
-            port: ${{ env.DB_PORT }}
-            user: ${{ env.DB_USER }}
-            password: ${{ env.DB_PASS }}
-            migrations: migrations
-            sslmode: disable
-            driver: postgres
-          
-          tgbot:
-            token: ${{ env.TG_TOKEN }}
-            notifyChat: ${{ env.TG_CHAT_ID }}" > config.yml
-
       - name: Copy config
-        run: rsync -avzP --rsh=ssh config.yml ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}/config.yml
+        run: rsync -avzP --rsh=ssh config.dist.yml ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}/config.yml
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@v0.1.7
@@ -115,5 +95,14 @@ jobs:
           key: ${{ secrets.SSH_SECRET_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: | 
+            export DEBUG_MODE=${{ env.DEBUG_MODE }}
+            export DB_HOST=${{ env.DB_HOST }}
+            export DB_NAME=${{ env.DB_NAME }}
+            export DB_PORT=${{ env.DB_PORT }}
+            export DB_USER=${{ env.DB_USER }}
+            export DB_PASS=${{ env.DB_PASS }}
+            export TG_TOKEN=${{ env.TG_TOKEN }}
+            export TG_CHAT_ID=${{ env.TG_CHAT_ID }}
+            
             cd /home/${{ secrets.SERVER_USERNAME }}/application
             ./${{ env.BUILD_APP_NAME }} -migration
