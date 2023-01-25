@@ -78,7 +78,7 @@ jobs:
 
       - name: commands
         run: |
-            cp -R ${{ env.BUILD_PATH }}/* ${{ env.DEPLOY_PATH }}/${{ env.BUILD_PATH }}
+            cp -R ${{ env.BUILD_PATH }}/* ${{ env.DEPLOY_PATH }}
             cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
             cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
           
