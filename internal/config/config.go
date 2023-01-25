@@ -21,7 +21,7 @@ type Database struct {
 
 type TGBot struct {
 	Token      string `yaml:"token"`
-	NotifyChat int    `yaml:"notifyChat,string"`
+	NotifyChat int    `yaml:"notifyChat"`
 }
 
 type Config struct {
