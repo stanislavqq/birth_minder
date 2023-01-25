@@ -80,6 +80,7 @@ jobs:
         run: |
             rm ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}
             cp -R ${{ env.BUILD_PATH }}/* ${{ env.DEPLOY_PATH }}
+            chmod +x ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}
             cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
             cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
           
