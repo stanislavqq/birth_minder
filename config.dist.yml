@@ -1,16 +1,16 @@
-debug: ${ DEBUG_MODE }
+debug: ${DEBUG_MODE|false}
 
 database:
   enabled: true
-  host: ${ DB_HOST }
-  name: ${ DB_NAME }
-  port: ${ DB_PORT }
-  user: ${ DB_USER }
-  password: ${ DB_PASS }
+  host: ${DB_HOST}
+  name: ${DB_NAME}
+  port: ${DB_PORT}
+  user: ${DB_USER}
+  password: ${DB_PASS}
   migrations: migrations
   sslmode: disable
   driver: postgres
 
 tgbot:
-  token: ${ TG_TOKEN }
-  notifyChat: ${ TG_CHAT_ID }
+  token: ${TG_TOKEN}
+  notifyChat: ${TG_CHAT_ID}
