@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: tests
-        run: ls ./ -la && ls ../ -la
+        run: ls ~ -la && ls ../ -la
 
       - name: Set up Go
         uses: actions/setup-go@v3
@@ -96,13 +96,13 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: Deploy with rsync
-        run: rsync -avzr --rsh=ssh ${{ env.BUILD_PATH }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}
+        run: cp -R ${{ env.BUILD_PATH }} ${{ env.DEPLOY_PATH }}/${{ env.BUILD_PATH }}
 
       - name: Copy migrations
-        run: rsync -avzr --rsh=ssh migrations ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}
+        run: cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
 
       - name: Copy config
-        run: rsync -avzP --rsh=ssh config.dist.yml ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}/config.yml
+        run: cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
 
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@v0.1.7
