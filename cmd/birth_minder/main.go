@@ -23,10 +23,15 @@ func main() {
 	}
 
 	migrations := flag.Bool("migration", false, "Define migrations start option")
+	debug := flag.Bool("debug", false, "Define debug mode option")
 	flag.Parse()
 
 	cfg := config.GetConfigInstance()
 	logger := log.With().Logger()
+
+	if *debug {
+		cfg.Debug = true
+	}
 
 	if cfg.Debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
