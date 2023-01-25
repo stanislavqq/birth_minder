@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -31,7 +31,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -43,7 +43,7 @@ jobs:
         run: CGO_ENABLED=0 go test -v -timeout 30s -coverprofile cover.out ./...
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [build, test]
     env:
       APP_FORMAT_MSG: "🎉🎉🎉\\nНапоминание о днюхе: \\n\\n {fullname} :: {soon_time}"
