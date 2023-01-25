@@ -34,15 +34,6 @@ jobs:
           name: build-files
           path: ${{ env.BUILD_PATH }}
 
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
   test:
     runs-on: self-hosted
     steps:
