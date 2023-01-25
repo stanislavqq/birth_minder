@@ -1,4 +1,4 @@
-[![Go](https://github.com/stanislavqq/birth_minder/actions/workflows/go.yml/badge.svg)](https://github.com/stanislavqq/birth_minder/actions/workflows/go.yml)
+[![Go](https://github.com/stanislavqq/birth_minder/actions/workflows/production.yml/badge.svg)](https://github.com/stanislavqq/birth_minder/actions/workflows/go.yml)
 
 # birth_minder
 
