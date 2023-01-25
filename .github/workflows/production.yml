@@ -87,7 +87,7 @@ jobs:
       - name: Copy config
         run: rsync -avzP --rsh=ssh config.dist.yml ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}/config.yml
 
-      - name: executing remote ssh commands using password
+      - name: executing remote ssh commands
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
