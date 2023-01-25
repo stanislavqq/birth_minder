@@ -76,6 +76,8 @@ jobs:
           if_key_exists: ignore
           key: ${{ secrets.SSH_SECRET_KEY }}
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+
+      - name: test
         run: ls -la ~
 
       - name: Adding Known Hosts
