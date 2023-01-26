@@ -98,3 +98,6 @@ jobs:
             
             cd ${{ env.DEPLOY_PATH }}
             ./${{ env.BUILD_APP_NAME }} -migration
+
+      - name: Restart service
+        run: sudo systemctl restart ${{ env.BUILD_APP_NAME }}
