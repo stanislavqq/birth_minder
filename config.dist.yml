@@ -1,4 +1,5 @@
 debug: ${DEBUG_MODE|false}
+formatMessage: ${FORMAT_MESSAGE}
 
 database:
   enabled: true

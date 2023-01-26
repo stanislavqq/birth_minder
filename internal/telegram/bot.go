@@ -17,7 +17,12 @@ func NewBot(token string) (TelegramBot, error) {
 
 	return TelegramBot{botapi: *bot}, nil
 }
-func (b *TelegramBot) SendTextToChat(ChatID int64, message string) {
+func (b *TelegramBot) SendTextToChat(ChatID int64, message string) (tgbotapi.Message, error) {
 	messageConf := tgbotapi.NewMessage(ChatID, message)
-	b.botapi.Send(messageConf)
+	send, err := b.botapi.Send(messageConf)
+	if err != nil {
+		return send, err
+	}
+
+	return send, nil
 }

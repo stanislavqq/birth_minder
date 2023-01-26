@@ -82,7 +82,7 @@ func main() {
 	defer c.Stop()
 	c.Start()
 
-	provider := telegram.New(cfg.TGBot, logger)
+	provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
 	err = notify.NewWorker(notifyCollector, provider, logger).Start()
 	if err != nil {
 		logger.Error().Err(err).Msg("Не удалось запустить воркер")
