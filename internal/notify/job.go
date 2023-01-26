@@ -63,12 +63,16 @@ func parseFormatMessage(format string, params map[string]string) string {
 func makeNotify(event bevent.BirthEvent, interval time.Duration, formatMessage string) Notify {
 	afterTime := durationToStringFormat(interval)
 
+	if len(formatMessage) == 0 {
+		formatMessage = "🎉🎉🎉 \nНапоминание: \n\n Скоро днюха!\n {fullname} :: {soon_time}"
+	}
 	msg := parseFormatMessage(formatMessage, map[string]string{
 		"fullname":  event.GetFullName(),
 		"firstname": event.FirstName,
 		"lastname":  event.LastName,
 		"soon_time": afterTime,
 	})
+
 	//msg := fmt.Sprintf("🎉🎉🎉Напоминание: \n\n У %s - %s будет День рождения.", event.GetFullName(), afterTime)
 	return NewNotify(msg, interval)
 }
