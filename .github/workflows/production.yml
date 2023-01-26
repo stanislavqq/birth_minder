@@ -86,14 +86,14 @@ jobs:
             cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
             cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
           
-            echo "export DEBUG_MODE=${{ env.DEBUG_MODE }}" > ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
-            echo "export DB_HOST=${{ env.DB_HOST }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
-            echo "export DB_NAME=${{ env.DB_NAME }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
-            echo "export DB_PORT=${{ env.DB_PORT }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
-            echo "export DB_USER=${{ env.DB_USER }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
-            echo "export DB_PASS=${{ env.DB_PASS }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
-            echo "export TG_TOKEN=${{ env.TG_TOKEN }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
-            echo "export TG_CHAT_ID=${{ env.TG_CHAT_ID }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            DEBUG_MODE=${{ env.DEBUG_MODE }}" > ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            DB_HOST=${{ env.DB_HOST }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            DB_NAME=${{ env.DB_NAME }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            DB_PORT=${{ env.DB_PORT }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            DB_USER=${{ env.DB_USER }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            DB_PASS=${{ env.DB_PASS }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            TG_TOKEN=${{ env.TG_TOKEN }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            TG_CHAT_ID=${{ env.TG_CHAT_ID }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
             
             cd ${{ env.DEPLOY_PATH }}
             ./${{ env.BUILD_APP_NAME }} -migration
