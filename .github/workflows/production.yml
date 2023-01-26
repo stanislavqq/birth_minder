@@ -99,4 +99,7 @@ jobs:
             
             cd ${{ env.DEPLOY_PATH }}
             ./${{ env.BUILD_APP_NAME }} -migration
-            systemctl --user restart {{ env.BUILD_APP_NAME }}.service
+
+      - name: restart service
+        run: systemctl --user restart {{ env.BUILD_APP_NAME }}.service
+        continue-on-error: true
