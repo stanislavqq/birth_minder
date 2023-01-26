@@ -70,7 +70,7 @@ func main() {
 
 	if cfg.Debug {
 		job.Run()
-		cronRule = "@every 10s"
+		cronRule = "@every 1m"
 	}
 
 	_, err := c.AddFunc(cronRule, func() {
