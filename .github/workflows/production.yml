@@ -88,6 +88,7 @@ jobs:
           
             echo "DEBUG_MODE=${{ env.DEBUG_MODE }}" > ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
             echo "DB_HOST=${{ env.DB_HOST }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "FORMAT_MESSAGE=${{ env.APP_FORMAT_MSG }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
             echo "DB_NAME=${{ env.DB_NAME }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
             echo "DB_PORT=${{ env.DB_PORT }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
             echo "DB_USER=${{ env.DB_USER }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
