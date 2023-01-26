@@ -3,7 +3,7 @@ package main
 import (
 	"BMinder/internal/config"
 	"BMinder/internal/database"
-	bevent "BMinder/internal/model/bevent"
+	"BMinder/internal/model/bevent"
 	"BMinder/internal/notify"
 	"BMinder/internal/telegram"
 	"flag"

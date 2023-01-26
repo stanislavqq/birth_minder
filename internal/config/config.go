@@ -44,11 +44,8 @@ func ReadConfigYML(configYML string) error {
 		return nil
 	}
 
-	// установим опции что парсим переменные окружения и будет yaml
-	config.WithOptions(config.ParseEnv, func(opt *config.Options) {
-		// Указываем тег для сопоставления данных к полям структур. По умолчанию = mapstructure
-		opt.DecoderConfig.TagName = yamlv3.Driver.Name()
-	})
+	config.WithOptions(config.ParseEnv)
+	config.WithTagName(yamlv3.Driver.Name())
 	config.AddDriver(yamlv3.Driver)
 
 	err := config.LoadFiles(configYML)
