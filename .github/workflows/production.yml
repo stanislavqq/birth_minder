@@ -86,22 +86,14 @@ jobs:
             cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
             cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
           
-            echo "export DEBUG_MODE=${{ env.DEBUG_MODE }}" > ~/.bash_exports 
-            echo "export DB_HOST=${{ env.DB_HOST }}" >> ~/.bash_exports
-            echo "export DB_NAME=${{ env.DB_NAME }}" >> ~/.bash_exports
-            echo "export DB_PORT=${{ env.DB_PORT }}" >> ~/.bash_exports
-            echo "export DB_USER=${{ env.DB_USER }}"  >> ~/.bash_exports
-            echo "export DB_PASS=${{ env.DB_PASS }}"  >> ~/.bash_exports
-            echo "export TG_TOKEN=${{ env.TG_TOKEN }}"  >> ~/.bash_exports
-            echo "export TG_CHAT_ID=${{ env.TG_CHAT_ID }}"  >> ~/.bash_exports
-            source ~/.bashrc
-            env
+            echo "export DEBUG_MODE=${{ env.DEBUG_MODE }}" > ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "export DB_HOST=${{ env.DB_HOST }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "export DB_NAME=${{ env.DB_NAME }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "export DB_PORT=${{ env.DB_PORT }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "export DB_USER=${{ env.DB_USER }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "export DB_PASS=${{ env.DB_PASS }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "export TG_TOKEN=${{ env.TG_TOKEN }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+            echo "export TG_CHAT_ID=${{ env.TG_CHAT_ID }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
             
             cd ${{ env.DEPLOY_PATH }}
             ./${{ env.BUILD_APP_NAME }} -migration
-          
-            echo $USER > /home/${{ secrets.SERVER_USERNAME }}/test.txt
-
-      - name: restart service
-        run: systemctl --user restart {{ env.BUILD_APP_NAME }}.service
-        continue-on-error: true
