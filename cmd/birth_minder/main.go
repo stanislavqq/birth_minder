@@ -7,6 +7,7 @@ import (
 	"BMinder/internal/notify"
 	"BMinder/internal/telegram"
 	"flag"
+	"fmt"
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -37,6 +38,8 @@ func main() {
 	if cfg.Debug {
 		log.Debug().Int("NotifyChat", cfg.TGBot.NotifyChat).Msg("NotifyChat")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
+		fmt.Println(cfg)
 	}
 
 	db, dbErr := database.NewDatabase(cfg.Database, logger)
