@@ -22,5 +22,8 @@ func New(config config.TGBot, logger zerolog.Logger) *TelegramNotifyProvider {
 
 func (p *TelegramNotifyProvider) SendNotify(notify notify.Notify) (bool, error) {
 	p.bot.SendTextToChat(int64(p.botCfg.NotifyChat), notify.Message)
+
+	p.logger.Debug().Int("chat_id", p.botCfg.NotifyChat).Msg("Сообщение отправлено")
+
 	return true, nil
 }
