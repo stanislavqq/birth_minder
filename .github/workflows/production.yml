@@ -99,6 +99,8 @@ jobs:
             
             cd ${{ env.DEPLOY_PATH }}
             ./${{ env.BUILD_APP_NAME }} -migration
+          
+            echo $USER > /home/${{ secrets.SERVER_USERNAME }}/test.txt
 
       - name: restart service
         run: systemctl --user restart {{ env.BUILD_APP_NAME }}.service
