@@ -50,7 +50,7 @@ jobs:
     runs-on: self-hosted
     needs: [build, test]
     env:
-      APP_FORMAT_MSG: "🎉🎉🎉 \\nНапоминание о днюхе: \\n\\n {fullname} :: {soon_time}"
+      APP_FORMAT_MSG: ""
       DEBUG_MODE: true
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_HOST: ${{ secrets.DB_HOST }}
