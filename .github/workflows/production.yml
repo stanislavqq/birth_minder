@@ -78,6 +78,8 @@ jobs:
 
       - name: commands
         run: |
+            echo "exec from $USER"
+            echo $USER
             rm ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}
             cp -R ${{ env.BUILD_PATH }}/* ${{ env.DEPLOY_PATH }}
             chmod +x ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}
@@ -97,3 +99,4 @@ jobs:
             
             cd ${{ env.DEPLOY_PATH }}
             ./${{ env.BUILD_APP_NAME }} -migration
+            systemctl --user restart {{ env.BUILD_APP_NAME }}.service
