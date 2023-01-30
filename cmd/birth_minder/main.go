@@ -1,13 +1,14 @@
 package main
 
 import (
+	"BMinder/internal/api/server"
 	"BMinder/internal/config"
 	"BMinder/internal/database"
 	"BMinder/internal/model/bevent"
 	"BMinder/internal/notify"
+	"BMinder/internal/personstore"
 	"BMinder/internal/telegram"
 	"flag"
-	"fmt"
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -36,10 +37,7 @@ func main() {
 	}
 
 	if cfg.Debug {
-		log.Debug().Int("NotifyChat", cfg.TGBot.NotifyChat).Msg("NotifyChat")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-
-		fmt.Println(cfg)
 	}
 
 	db, dbErr := database.NewDatabase(cfg.Database, logger)
@@ -81,6 +79,13 @@ func main() {
 	}
 	defer c.Stop()
 	c.Start()
+
+	perStore := personstore.New(db.DB, logger)
+
+	if err := server.NewServer(perStore).Start(cfg, logger); err != nil {
+		logger.Error().Err(err).Msg("Ошибка старта http сервера")
+		return
+	}
 
 	provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
 	err = notify.NewWorker(notifyCollector, provider, logger).Start()
