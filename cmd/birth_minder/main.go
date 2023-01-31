@@ -7,12 +7,15 @@ import (
 	"BMinder/internal/model/bevent"
 	"BMinder/internal/notify"
 	"BMinder/internal/personstore"
-	"BMinder/internal/telegram"
+	"context"
 	"flag"
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -31,6 +34,10 @@ func main() {
 
 	cfg := config.GetConfigInstance()
 	logger := log.With().Logger()
+
+	ctx := context.Background()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	if *debug {
 		cfg.Debug = true
@@ -82,14 +89,21 @@ func main() {
 
 	perStore := personstore.New(db.DB, logger)
 
-	if err := server.NewServer(perStore).Start(cfg, logger); err != nil {
+	if err := server.NewServer(perStore).Start(cfg, ctx, logger); err != nil {
 		logger.Error().Err(err).Msg("Ошибка старта http сервера")
 		return
 	}
 
-	provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
-	err = notify.NewWorker(notifyCollector, provider, logger).Start()
-	if err != nil {
-		logger.Error().Err(err).Msg("Не удалось запустить воркер")
+	//provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
+	//err = notify.NewWorker(notifyCollector, provider, logger).Start(ctx)
+	//if err != nil {
+	//	logger.Error().Err(err).Msg("Не удалось запустить воркер")
+	//}
+
+	select {
+	case v := <-quit:
+		logger.Info().Msgf("signal.Notify: %v", v)
+	case done := <-ctx.Done():
+		logger.Info().Msgf("ctx.Done: %v", done)
 	}
 }

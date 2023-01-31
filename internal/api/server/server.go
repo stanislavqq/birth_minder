@@ -3,9 +3,12 @@ package server
 import (
 	"BMinder/internal/config"
 	"BMinder/internal/personstore"
+	"context"
+	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
-	"io"
 	"net/http"
+	"time"
 )
 
 type Server struct {
@@ -18,38 +21,68 @@ func NewServer(store *personstore.PersonStore) *Server {
 	}
 }
 
-func (s *Server) Start(cfg *config.Config, logger zerolog.Logger) error {
+func (s *Server) Start(cfg *config.Config, ctx context.Context, logger zerolog.Logger) error {
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, request *http.Request) {
-		persons := s.store.GetPersonAll()
+	//mux.HandleFunc("/person/", func(w http.ResponseWriter, request *http.Request) {
+	//
+	//	var res Response
+	//
+	//	if request.Method == http.MethodGet {
+	//		persons := s.store.GetPersonAll()
+	//		res = NewResponse(persons, 200)
+	//	}
+	//
+	//	w.Header().Set("Content-Type", "application/json")
+	//	json, err := res.GetJson()
+	//	if err != nil {
+	//		logger.Error().Err(err).Msg("Не удалось вставить данные в ответ_")
+	//	}
+	//
+	//	_, err = w.Write(json)
+	//	if err != nil {
+	//		logger.Error().Err(err).Msg("Не удалось вставить данные в ответ")
+	//	}
+	//})
 
-		_, err := io.WriteString(w, "Root Bitch, HTTP!\n")
-		if err != nil {
-			panic(err)
+	r := mux.NewRouter()
+
+	r.HandleFunc("/person", func(w http.ResponseWriter, request *http.Request) {
+		if request.Method == http.MethodGet {
+			persons := s.store.GetPersonAll()
+
+			data, err := json.Marshal(persons)
+			if err != nil {
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_, err = w.Write(data)
+			if err != nil {
+				logger.Error().Err(err)
+				return
+			}
 		}
+
 	})
 
-	mux.HandleFunc("/hello", func(w http.ResponseWriter, request *http.Request) {
-
-		_, err := io.WriteString(w, "Hello MZF, HTTP!\n")
-		if err != nil {
-			panic(err)
-		}
-	})
-
+	logger.Info().Msg("Инициализация http сервера")
+	srv := &http.Server{
+		Handler: r,
+		Addr:    "127.0.0.1:3333",
+		// Good practice: enforce timeouts for servers you create!
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+	logger.Info().Msg("test")
 	var err error
 	go func() {
-		logger.Info().Msg("Инициализация http сервера")
-		err = http.ListenAndServe(":3333", mux)
-		if err != nil {
-			logger.Error().Err(err)
-			return
+		logger.Info().Msg("test2")
+		if err := srv.ListenAndServe(); err != nil {
+			logger.Fatal().Err(err).Msg("Ошибка запуска http сервера")
 		}
+
+		logger.Info().Msg("http сервер готов принимать запросы")
 	}()
 
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

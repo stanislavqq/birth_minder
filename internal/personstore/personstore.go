@@ -31,7 +31,7 @@ func (s *PersonStore) DeletePerson() error {
 }
 
 func (s *PersonStore) GetPersonAll() []bevent.BirthEvent {
-	rows, err := s.db.Query("SELECT * FROM birth_list")
+	rows, err := s.db.Query("SELECT * FROM birth_list ORDER BY month, day")
 	if err != nil {
 		s.logger.Error().Err(err).Msg("Не удалось выполнить запрос на получение списка")
 	}
@@ -40,7 +40,7 @@ func (s *PersonStore) GetPersonAll() []bevent.BirthEvent {
 
 	for rows.Next() {
 		var person bevent.BirthEvent
-		if err := rows.Scan(&person); err != nil {
+		if err := rows.Scan(&person.ID, &person.FirstName, &person.LastName, &person.Day, &person.Month, &person.Year, &person.Comment); err != nil {
 			s.logger.Error().Err(err).Msg("Не удалось конвертировать ")
 		}
 
