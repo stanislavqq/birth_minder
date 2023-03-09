@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: ["dev"]
 
-env:
-
-
 jobs:
   build:
     runs-on: self-hosted
