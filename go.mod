@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/gookit/config/v2 v2.1.8
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.6
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
