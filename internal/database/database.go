@@ -1,10 +1,10 @@
 package database
 
 import (
-	"BMinder/internal/config"
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
+	"github.com/stanislavqq/birth_minder/internal/config"
 )
 
 func NewDatabase(cfg config.Database, logger zerolog.Logger) (*sqlx.DB, error) {

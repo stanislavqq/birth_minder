@@ -1,11 +1,11 @@
 package database
 
 import (
-	"BMinder/internal/config"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
+	"github.com/stanislavqq/birth_minder/internal/config"
 )
 
 func NewPostgres(cfg config.Database, logger zerolog.Logger) (*sqlx.DB, error) {

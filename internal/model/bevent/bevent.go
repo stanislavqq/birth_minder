@@ -14,7 +14,6 @@ type BirthEvent struct {
 	Month     int32          `db:"month"`
 	Year      sql.NullInt32  `db:"year"`
 	Comment   sql.NullString `db:"comment"`
-	AccountID int32          `db:"account_id"`
 }
 
 func (e *BirthEvent) GetFullName() string {

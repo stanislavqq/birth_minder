@@ -1,17 +1,23 @@
 package main
 
 import (
-	"BMinder/internal/config"
-	"BMinder/internal/database"
-	"BMinder/internal/model/bevent"
-	"BMinder/internal/notify"
-	"BMinder/internal/telegram"
+	"context"
 	"flag"
 	"fmt"
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/stanislavqq/birth_minder/internal/api/server"
+	"github.com/stanislavqq/birth_minder/internal/config"
+	"github.com/stanislavqq/birth_minder/internal/database"
+	"github.com/stanislavqq/birth_minder/internal/model/bevent"
+	"github.com/stanislavqq/birth_minder/internal/notify"
+	"github.com/stanislavqq/birth_minder/internal/personstore"
+	"github.com/stanislavqq/birth_minder/internal/telegram"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -31,15 +37,17 @@ func main() {
 	cfg := config.GetConfigInstance()
 	logger := log.With().Logger()
 
+	ctx := context.Background()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
 	if *debug {
+		fmt.Println("Debug mode on")
 		cfg.Debug = true
 	}
 
 	if cfg.Debug {
-		log.Debug().Int("NotifyChat", cfg.TGBot.NotifyChat).Msg("NotifyChat")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-
-		fmt.Println(cfg)
 	}
 
 	db, dbErr := database.NewDatabase(cfg.Database, logger)
@@ -82,9 +90,23 @@ func main() {
 	defer c.Stop()
 	c.Start()
 
+	perStore := personstore.New(db.DB, logger)
+
+	if err := server.NewServer(perStore).Start(cfg, ctx, logger); err != nil {
+		logger.Error().Err(err).Msg("Ошибка старта http сервера")
+		return
+	}
+
 	provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
-	err = notify.NewWorker(notifyCollector, provider, logger).Start()
+	err = notify.NewWorker(notifyCollector, provider, logger).Start(ctx)
 	if err != nil {
 		logger.Error().Err(err).Msg("Не удалось запустить воркер")
+	}
+
+	select {
+	case v := <-quit:
+		logger.Info().Msgf("signal.Notify: %v", v)
+	case done := <-ctx.Done():
+		logger.Info().Msgf("ctx.Done: %v", done)
 	}
 }

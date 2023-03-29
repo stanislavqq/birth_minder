@@ -1,9 +1,9 @@
 package notify
 
 import (
-	bevent "BMinder/internal/model/bevent"
 	"fmt"
 	"github.com/rs/zerolog"
+	bevent "github.com/stanislavqq/birth_minder/internal/model/bevent"
 	"math"
 	"strings"
 	"time"
@@ -63,7 +63,7 @@ func parseFormatMessage(format string, params map[string]string) string {
 func makeNotify(event bevent.BirthEvent, interval time.Duration, formatMessage string) Notify {
 	afterTime := durationToStringFormat(interval)
 
-	if formatMessage == "${FORMAT_MESSAGE}" {
+	if formatMessage == "${FORMAT_MESSAGE}" || formatMessage == "" {
 		formatMessage = "🎉🎉🎉 \nНапоминание: \n\n Скоро днюха!\n {fullname} :: {soon_time}"
 	}
 	msg := parseFormatMessage(formatMessage, map[string]string{

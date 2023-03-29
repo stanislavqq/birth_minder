@@ -1,0 +1,103 @@
+name: Dev
+
+on:
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
+
+env:
+  DEPLOY_PATH: /home/${{ secrets.SERVER_USERNAME }}/application
+  BUILD_PATH: bin
+  BUILD_APP_NAME: bminder
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: tests
+        run: ls ~ -la && ls ../ -la
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+          cache: true
+
+      - name: Build
+        run: go mod download && CGO_ENABLED=0 go build -o ./bin/${{ env.BUILD_APP_NAME }} ./cmd/birth_minder/main.go
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-files
+          path: ${{ env.BUILD_PATH }}
+
+#  test:
+#    runs-on: self-hosted
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up Go
+#        uses: actions/setup-go@v3
+#        with:
+#          go-version: 1.19
+#
+#      - name: Test
+#        run: CGO_ENABLED=0 go test -v -timeout 20s -coverprofile cover.out ./...
+
+  deploy:
+    runs-on: self-hosted
+    needs: [build, test]
+    env:
+      APP_FORMAT_MSG:
+      DEBUG_MODE: false
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+      TG_TOKEN: ${{ secrets.TG_TOKEN }}
+      TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Get build
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: ${{ env.BUILD_PATH }}
+
+      - name: test
+        run: ls -la ~
+
+      - name: commands
+        run: |
+          echo "exec from $USER"
+          echo $USER
+          rm ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}
+          cp -R ${{ env.BUILD_PATH }}/* ${{ env.DEPLOY_PATH }}
+          chmod +x ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}
+          cp -R migrations ${{ env.DEPLOY_PATH }}/migrations
+          cp config.dist.yml ${{ env.DEPLOY_PATH }}/config.yml
+          
+          echo "DEBUG_MODE=${{ env.DEBUG_MODE }}" > ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "DB_HOST=${{ env.DB_HOST }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "FORMAT_MESSAGE=${{ env.APP_FORMAT_MSG }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "DB_NAME=${{ env.DB_NAME }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "DB_PORT=${{ env.DB_PORT }}" >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "DB_USER=${{ env.DB_USER }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "DB_PASS=${{ env.DB_PASS }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "TG_TOKEN=${{ env.TG_TOKEN }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          echo "TG_CHAT_ID=${{ env.TG_CHAT_ID }}"  >> ${{ env.DEPLOY_PATH }}/${{ env.BUILD_APP_NAME }}.env 
+          
+          cd ${{ env.DEPLOY_PATH }}
+          ./${{ env.BUILD_APP_NAME }} -migration
+
+      - name: Restart service
+        run: sudo systemctl restart ${{ env.BUILD_APP_NAME }}
