@@ -1,12 +1,12 @@
 package server
 
 import (
-	"BMinder/internal/config"
-	"BMinder/internal/personstore"
 	"context"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
+	"github.com/stanislavqq/birth_minder/internal/config"
+	"github.com/stanislavqq/birth_minder/internal/personstore"
 	"net/http"
 	"time"
 )
@@ -73,10 +73,8 @@ func (s *Server) Start(cfg *config.Config, ctx context.Context, logger zerolog.L
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	logger.Info().Msg("test")
 	var err error
 	go func() {
-		logger.Info().Msg("test2")
 		if err := srv.ListenAndServe(); err != nil {
 			logger.Fatal().Err(err).Msg("Ошибка запуска http сервера")
 		}

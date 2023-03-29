@@ -1,10 +1,10 @@
 package telegram
 
 import (
-	"BMinder/internal/config"
-	"BMinder/internal/notify"
 	"fmt"
 	"github.com/rs/zerolog"
+	"github.com/stanislavqq/birth_minder/internal/config"
+	"github.com/stanislavqq/birth_minder/internal/notify"
 )
 
 type TelegramNotifyProvider struct {

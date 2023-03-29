@@ -1,18 +1,20 @@
 package main
 
 import (
-	"BMinder/internal/api/server"
-	"BMinder/internal/config"
-	"BMinder/internal/database"
-	"BMinder/internal/model/bevent"
-	"BMinder/internal/notify"
-	"BMinder/internal/personstore"
 	"context"
 	"flag"
+	"fmt"
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/stanislavqq/birth_minder/internal/api/server"
+	"github.com/stanislavqq/birth_minder/internal/config"
+	"github.com/stanislavqq/birth_minder/internal/database"
+	"github.com/stanislavqq/birth_minder/internal/model/bevent"
+	"github.com/stanislavqq/birth_minder/internal/notify"
+	"github.com/stanislavqq/birth_minder/internal/personstore"
+	"github.com/stanislavqq/birth_minder/internal/telegram"
 	"os"
 	"os/signal"
 	"syscall"
@@ -40,6 +42,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	if *debug {
+		fmt.Println("Debug mode on")
 		cfg.Debug = true
 	}
 
@@ -94,11 +97,11 @@ func main() {
 		return
 	}
 
-	//provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
-	//err = notify.NewWorker(notifyCollector, provider, logger).Start(ctx)
-	//if err != nil {
-	//	logger.Error().Err(err).Msg("Не удалось запустить воркер")
-	//}
+	provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
+	err = notify.NewWorker(notifyCollector, provider, logger).Start(ctx)
+	if err != nil {
+		logger.Error().Err(err).Msg("Не удалось запустить воркер")
+	}
 
 	select {
 	case v := <-quit:

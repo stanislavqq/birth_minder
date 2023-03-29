@@ -1,9 +1,9 @@
 package personstore
 
 import (
-	"BMinder/internal/model/bevent"
 	"database/sql"
 	"github.com/rs/zerolog"
+	"github.com/stanislavqq/birth_minder/internal/model/bevent"
 )
 
 type PersonStore struct {

@@ -1,9 +1,9 @@
 package notify
 
 import (
-	bevent "BMinder/internal/model/bevent"
 	"fmt"
 	"github.com/rs/zerolog"
+	bevent "github.com/stanislavqq/birth_minder/internal/model/bevent"
 	"math"
 	"strings"
 	"time"
