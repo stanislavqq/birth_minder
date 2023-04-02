@@ -28,6 +28,7 @@ type Config struct {
 	Debug         bool     `yaml:"debug"`
 	FormatMessage string   `yaml:"formatMessage"`
 	Database      Database `yaml:"database"`
+	CronRule      string   `yaml:"cronRule"`
 	TGBot         TGBot    `yaml:"tgbot"`
 }
 
