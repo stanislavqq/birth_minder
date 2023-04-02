@@ -37,6 +37,8 @@ func main() {
 	cfg := config.GetConfigInstance()
 	logger := log.With().Logger()
 
+	logger.Info().Msgf("Init app with = debug_mode: %s; cron: %s; message_format: %s", cfg.Debug, cfg.CronRule, cfg.FormatMessage)
+
 	ctx := context.Background()
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
