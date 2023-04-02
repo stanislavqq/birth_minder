@@ -76,7 +76,7 @@ func main() {
 	rep := bevent.NewRepository(db, logger)
 	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
 
-	cronRule := "0 0 9 * * *"
+	cronRule := cfg.CronRule
 
 	if cfg.Debug {
 		job.Run()
