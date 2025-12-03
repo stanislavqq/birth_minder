@@ -1,0 +1,22 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+System_Ext(tg, "Telegram Bot", $sprite="robot")
+Person(p, "User")
+ContainerDb(storage, "Storage")
+Component(api, "API")
+Component(scheduler, "Scheduler")
+Component(birth_rep, "BirthUsersRepository ")
+Component(notifier, "Сервис опещения")
+
+Rel(p, api, "Добавление записей др / Настройки расписания др")
+Rel(api, birth_rep, "")
+Rel(birth_rep, storage, "Запись/Чтение ДР")
+
+Rel(scheduler, birth_rep, "Чтение др")
+Rel(scheduler, notifier, "Оповещение о ближайшем ДР")
+Rel(notifier, tg, "Отправка осообщения")
+
+@enduml
