@@ -2,19 +2,18 @@ package bevent
 
 import (
 	"database/sql"
-	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
 	"strings"
 )
 
 type Repository struct {
-	db        *sqlx.DB
+	db        *sql.DB
 	logger    zerolog.Logger
 	tableName string
 	fields    []string
 }
 
-func NewRepository(db *sqlx.DB, logger zerolog.Logger) *Repository {
+func NewRepository(db *sql.DB, logger zerolog.Logger) *Repository {
 	return &Repository{
 		db:        db,
 		logger:    logger,
@@ -25,7 +24,8 @@ func NewRepository(db *sqlx.DB, logger zerolog.Logger) *Repository {
 
 func (r *Repository) GetListByDayMonth(day int, month int) (BirthEvents, error) {
 	var birthEvent BirthEvent
-	sqlQuery := "SELECT " + strings.Join(r.fields, ", ") + " FROM " + r.tableName + " WHERE day = $1 AND month = $2"
+	sqlQuery := "SELECT " + strings.Join(r.fields, ", ") + " FROM " + r.tableName + " WHERE day = ? AND month = ?"
+
 	rows, err := r.db.Query(sqlQuery, day, month)
 	if err != nil {
 		r.logger.Err(err).Msg("Не удалось выполнить запрос")

@@ -50,7 +50,7 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	db, dbErr := database.NewDatabase(cfg.Database, logger)
+	db, dbErr := database.NewMysql(cfg.Database, logger)
 	if dbErr != nil {
 		log.Fatal().Err(dbErr).Msg("Ошибка подключения к БД")
 	}
@@ -62,7 +62,7 @@ func main() {
 	}
 
 	if *migrations {
-		if gooseError := goose.Up(db.DB, cfg.Database.Migrations); gooseError != nil {
+		if gooseError := goose.Up(db, cfg.Database.Migrations); gooseError != nil {
 			log.Fatal().Err(gooseError).Msg("Ошибка выполнения миграции")
 		}
 		return
@@ -74,7 +74,7 @@ func main() {
 	rep := bevent.NewRepository(db, logger)
 	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
 
-	cronRule := "0 0 9 * * "
+	cronRule := "0 0 12 * * "
 
 	if cfg.Debug {
 		job.Run()
@@ -90,7 +90,7 @@ func main() {
 	defer c.Stop()
 	c.Start()
 
-	perStore := personstore.New(db.DB, logger)
+	perStore := personstore.New(db, logger)
 
 	if err := server.NewServer(perStore).Start(cfg, ctx, logger); err != nil {
 		logger.Error().Err(err).Msg("Ошибка старта http сервера")
