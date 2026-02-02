@@ -2,3 +2,4 @@
 .env
 database.sqlite
 config.yml
+config.*.yml
