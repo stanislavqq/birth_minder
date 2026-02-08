@@ -15,7 +15,7 @@ type TelegramNotifyProvider struct {
 }
 
 func New(config config.TGBot, debug bool, logger zerolog.Logger) *TelegramNotifyProvider {
-	bot, err := NewBot(config.Token)
+	bot, err := NewBot(config.Token, &logger)
 	if err != nil {
 		logger.Error().Err(err).Msg("Ошибка при создании бота")
 	}
