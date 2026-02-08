@@ -41,7 +41,7 @@ func (r *Repository) GetListByDayMonth(day int, month int) (BirthEvents, error) 
 		eventList = append(eventList, birthEvent)
 	}
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
+		err = rows.Close()
 		if err != nil {
 			r.logger.Error().Err(err).Msg("Не удалось закрыть соединение")
 		}
