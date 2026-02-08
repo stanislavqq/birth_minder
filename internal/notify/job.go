@@ -64,7 +64,7 @@ func makeNotify(event bevent.BirthEvent, interval time.Duration, formatMessage s
 	afterTime := durationToStringFormat(interval)
 
 	if formatMessage == "${FORMAT_MESSAGE}" || formatMessage == "" {
-		formatMessage = "🎉🎉🎉 \nНапоминание: \n\n Скоро днюха!\n {fullname} :: {soon_time}"
+		formatMessage = "🎉🍻🍕🎂 \nНапоминаю: \n\n Скоро днюха!\n {fullname} :: {soon_time}"
 	}
 	msg := parseFormatMessage(formatMessage, map[string]string{
 		"fullname":  event.GetFullName(),
