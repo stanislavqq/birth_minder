@@ -17,6 +17,7 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/telegram"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -107,6 +108,30 @@ func main() {
 	if err != nil {
 		logger.Error().Err(err).Msg("Не удалось запустить воркер")
 	}
+
+	cmdController := telegram.NewCommandController(cfg.TGBot, cfg.Debug, logger)
+	cmdController.HandleCommandFunc("event", func(sender telegram.MessageSender) {
+		t := time.Now()
+
+		vday := t.Day()
+		vmonth := int(t.Month())
+
+		list, err := rep.GetUpcomingBDay(vday, vmonth)
+		if err != nil {
+			logger.Error().Err(err).Msg("Ошибка получения близжайших событий")
+		}
+
+		msg := "Ближайшие дни рождения в этом месяце: \n\n"
+		fmt.Println(list)
+		for _, v := range list {
+
+			msg += v.GetFullName() + " - "
+			msg += strconv.Itoa(int(v.Day)) + "." + strconv.Itoa(int(v.Month)) + "\n"
+		}
+
+		sender.SendTextToChat(int64(cfg.TGBot.NotifyChat), msg)
+	})
+	cmdController.Start()
 
 	select {
 	case v := <-quit:
