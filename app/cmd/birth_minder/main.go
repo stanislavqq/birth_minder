@@ -12,9 +12,9 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/config"
 	"github.com/stanislavqq/birth_minder/internal/database"
 	"github.com/stanislavqq/birth_minder/internal/model/bevent"
-	"github.com/stanislavqq/birth_minder/internal/notify"
+	notify2 "github.com/stanislavqq/birth_minder/internal/notify"
 	"github.com/stanislavqq/birth_minder/internal/personstore"
-	"github.com/stanislavqq/birth_minder/internal/telegram"
+	telegram2 "github.com/stanislavqq/birth_minder/internal/telegram"
 	"os"
 	"os/signal"
 	"strconv"
@@ -69,11 +69,11 @@ func main() {
 		return
 	}
 
-	notifyCollector := make(chan notify.Notify)
+	notifyCollector := make(chan notify2.Notify)
 
 	c := cron.New()
 	rep := bevent.NewRepository(db, logger)
-	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
+	job := notify2.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
 
 	var cronRule string
 	if len(cfg.CronRule) > 0 {
@@ -103,14 +103,14 @@ func main() {
 		return
 	}
 
-	provider := telegram.New(cfg.TGBot, cfg.Debug, logger)
-	err = notify.NewWorker(notifyCollector, provider, logger).Start(ctx)
+	provider := telegram2.New(cfg.TGBot, cfg.Debug, logger)
+	err = notify2.NewWorker(notifyCollector, provider, logger).Start(ctx)
 	if err != nil {
 		logger.Error().Err(err).Msg("Не удалось запустить воркер")
 	}
 
-	cmdController := telegram.NewCommandController(cfg.TGBot, cfg.Debug, logger)
-	cmdController.HandleCommandFunc("event", func(sender telegram.MessageSender) {
+	cmdController := telegram2.NewCommandController(cfg.TGBot, cfg.Debug, logger)
+	cmdController.HandleCommandFunc("event", func(sender telegram2.MessageSender) {
 		t := time.Now()
 
 		vday := t.Day()
@@ -122,9 +122,11 @@ func main() {
 		}
 
 		msg := "Ближайшие дни рождения в этом месяце: \n\n"
-		fmt.Println(list)
-		for _, v := range list {
+		if len(list) == 0 {
+			msg = "Ближайшие дни рождения отсутствуют. \n\n"
+		}
 
+		for _, v := range list {
 			msg += v.GetFullName() + " - "
 			msg += strconv.Itoa(int(v.Day)) + "." + strconv.Itoa(int(v.Month)) + "\n"
 		}

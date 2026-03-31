@@ -1,7 +1,7 @@
 debug: ${DEBUG_MODE|false}
 formatMessage: ${FORMAT_MESSAGE}
 
-cronRule: "0 10 * * *"
+cronRule: ${CROM_RULE}
 
 database:
   enabled: true

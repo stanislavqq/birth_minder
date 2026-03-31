@@ -3,7 +3,7 @@ package notify
 import (
 	"fmt"
 	"github.com/rs/zerolog"
-	bevent "github.com/stanislavqq/birth_minder/internal/model/bevent"
+	bevent2 "github.com/stanislavqq/birth_minder/internal/model/bevent"
 	"math"
 	"strings"
 	"time"
@@ -11,14 +11,14 @@ import (
 
 type FindNotifyJob struct {
 	logger        zerolog.Logger
-	eventRep      *bevent.Repository
+	eventRep      *bevent2.Repository
 	notifyTimes   []time.Duration
 	messageFormat string
 	NotifyChan    chan Notify
 	debug         bool
 }
 
-func NewJob(repository *bevent.Repository, messageFormat string, notifyTimes []time.Duration, collector chan Notify, debug bool, logger zerolog.Logger) *FindNotifyJob {
+func NewJob(repository *bevent2.Repository, messageFormat string, notifyTimes []time.Duration, collector chan Notify, debug bool, logger zerolog.Logger) *FindNotifyJob {
 	return &FindNotifyJob{
 		logger:        logger,
 		eventRep:      repository,
@@ -47,7 +47,7 @@ func (j *FindNotifyJob) Run() {
 				go notifyToChan(notify, j.NotifyChan)
 			}
 		}
-		eventList = bevent.BirthEvents{}
+		eventList = bevent2.BirthEvents{}
 	}
 }
 
@@ -60,7 +60,7 @@ func parseFormatMessage(format string, params map[string]string) string {
 	return res
 }
 
-func makeNotify(event bevent.BirthEvent, interval time.Duration, formatMessage string) Notify {
+func makeNotify(event bevent2.BirthEvent, interval time.Duration, formatMessage string) Notify {
 	afterTime := durationToStringFormat(interval)
 
 	if formatMessage == "${FORMAT_MESSAGE}" || formatMessage == "" {
@@ -106,7 +106,7 @@ func durationToStringFormat(duration time.Duration) string {
 	return res
 }
 
-func (j *FindNotifyJob) findBirthEventByDuration(duration time.Duration) (bevent.BirthEvents, error) {
+func (j *FindNotifyJob) findBirthEventByDuration(duration time.Duration) (bevent2.BirthEvents, error) {
 	paramDay, paramMonth := j.getDayMonthFromDuration(duration)
 	eventList, err := j.eventRep.GetListByDayMonth(paramDay, paramMonth)
 	if err != nil {

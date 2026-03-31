@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/stanislavqq/birth_minder/internal/config"
 )
@@ -34,17 +33,17 @@ func (c *CommandController) Start() {
 
 			if update.Message.IsCommand() {
 				if update.Message.Command() == "status" {
-					c.bot.SendTextToChat(update.Message.Chat.ID, "Bot is working.")
+					_, err := c.bot.SendTextToChat(update.Message.Chat.ID, "✅ Bot is working.")
+					if err != nil {
+						c.logger.Err(err).Msg("Неудалось отправить сообщение")
+					}
 				}
 
 				for command, handleFunc := range c.commandHandlerList {
-					fmt.Println(command)
 					if command == update.Message.Command() {
 						handleFunc(&c.bot)
 					}
 				}
-
-				return
 			}
 		}
 	}
