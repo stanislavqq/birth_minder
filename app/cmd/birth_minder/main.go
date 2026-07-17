@@ -17,6 +17,7 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/telegram"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -52,7 +53,7 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	db, dbErr := database.NewDatabase(cfg.Database, logger)
+	db, dbErr := database.NewMysql(cfg.Database, logger)
 	if dbErr != nil {
 		log.Fatal().Err(dbErr).Msg("Ошибка подключения к БД")
 	}
@@ -64,7 +65,7 @@ func main() {
 	}
 
 	if *migrations {
-		if gooseError := goose.Up(db.DB, cfg.Database.Migrations); gooseError != nil {
+		if gooseError := goose.Up(db, cfg.Database.Migrations); gooseError != nil {
 			log.Fatal().Err(gooseError).Msg("Ошибка выполнения миграции")
 		}
 		return
@@ -76,7 +77,12 @@ func main() {
 	rep := bevent.NewRepository(db, logger)
 	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
 
-	cronRule := cfg.CronRule
+	var cronRule string
+	if len(cfg.CronRule) > 0 {
+		cronRule = cfg.CronRule
+	} else {
+		cronRule = "0 10 * * * "
+	}
 
 	if cfg.Debug {
 		job.Run()
@@ -92,7 +98,7 @@ func main() {
 	defer c.Stop()
 	c.Start()
 
-	perStore := personstore.New(db.DB, logger)
+	perStore := personstore.New(db, logger)
 
 	if err := server.NewServer(perStore).Start(cfg, ctx, logger); err != nil {
 		logger.Error().Err(err).Msg("Ошибка старта http сервера")
@@ -104,6 +110,32 @@ func main() {
 	if err != nil {
 		logger.Error().Err(err).Msg("Не удалось запустить воркер")
 	}
+
+	cmdController := telegram2.NewCommandController(cfg.TGBot, cfg.Debug, logger)
+	cmdController.HandleCommandFunc("event", func(sender telegram2.MessageSender) {
+		t := time.Now()
+
+		vday := t.Day()
+		vmonth := int(t.Month())
+
+		list, err := rep.GetUpcomingBDay(vday, vmonth)
+		if err != nil {
+			logger.Error().Err(err).Msg("Ошибка получения близжайших событий")
+		}
+
+		msg := "Ближайшие дни рождения в этом месяце: \n\n"
+		if len(list) == 0 {
+			msg = "Ближайшие дни рождения отсутствуют. \n\n"
+		}
+
+		for _, v := range list {
+			msg += v.GetFullName() + " - "
+			msg += strconv.Itoa(int(v.Day)) + "." + strconv.Itoa(int(v.Month)) + "\n"
+		}
+
+		sender.SendTextToChat(int64(cfg.TGBot.NotifyChat), msg)
+	})
+	cmdController.Start()
 
 	select {
 	case v := <-quit:

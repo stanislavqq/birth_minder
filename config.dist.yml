@@ -1,6 +1,8 @@
 debug: ${DEBUG_MODE|false}
 formatMessage: ${FORMAT_MESSAGE}
 
+cronRule: ${CROM_RULE}
+
 database:
   enabled: true
   host: ${DB_HOST}

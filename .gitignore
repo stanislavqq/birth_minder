@@ -1,4 +1,5 @@
 .idea
 .env
 database.sqlite
-config.yml
+app/config.yml
+config.*.yml

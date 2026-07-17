@@ -2,19 +2,18 @@ package bevent
 
 import (
 	"database/sql"
-	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
 	"strings"
 )
 
 type Repository struct {
-	db        *sqlx.DB
+	db        *sql.DB
 	logger    zerolog.Logger
 	tableName string
 	fields    []string
 }
 
-func NewRepository(db *sqlx.DB, logger zerolog.Logger) *Repository {
+func NewRepository(db *sql.DB, logger zerolog.Logger) *Repository {
 	return &Repository{
 		db:        db,
 		logger:    logger,
@@ -25,7 +24,8 @@ func NewRepository(db *sqlx.DB, logger zerolog.Logger) *Repository {
 
 func (r *Repository) GetListByDayMonth(day int, month int) (BirthEvents, error) {
 	var birthEvent BirthEvent
-	sqlQuery := "SELECT " + strings.Join(r.fields, ", ") + " FROM " + r.tableName + " WHERE day = $1 AND month = $2"
+	sqlQuery := "SELECT " + strings.Join(r.fields, ", ") + " FROM " + r.tableName + " WHERE day = ? AND month = ?"
+
 	rows, err := r.db.Query(sqlQuery, day, month)
 	if err != nil {
 		r.logger.Err(err).Msg("Не удалось выполнить запрос")
@@ -41,7 +41,7 @@ func (r *Repository) GetListByDayMonth(day int, month int) (BirthEvents, error) 
 		eventList = append(eventList, birthEvent)
 	}
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
+		err = rows.Close()
 		if err != nil {
 			r.logger.Error().Err(err).Msg("Не удалось закрыть соединение")
 		}
@@ -50,6 +50,36 @@ func (r *Repository) GetListByDayMonth(day int, month int) (BirthEvents, error) 
 	if len(eventList) == 0 {
 		r.logger.Info().Msg("Не найдено записей для работы")
 	}
+
+	return eventList, nil
+}
+
+func (r *Repository) GetUpcomingBDay(day int, month int) (BirthEvents, error) {
+	var birthEvent BirthEvent
+	sqlQuery := "SELECT * FROM birth_list WHERE month = ? AND day > ? ORDER BY month ASC, day ASC"
+
+	rows, err := r.db.Query(sqlQuery, month, day)
+	if err != nil {
+		r.logger.Err(err).Msg("Не удалось выполнить запрос")
+		return nil, err
+	}
+	eventList := BirthEvents{}
+
+	for rows.Next() {
+		err := rows.Scan(&birthEvent.ID, &birthEvent.FirstName, &birthEvent.LastName, &birthEvent.Day, &birthEvent.Month, &birthEvent.Year, &birthEvent.Comment)
+		if err != nil {
+			r.logger.Err(err).Msg("Не удалось выполнить scan")
+			return nil, err
+		}
+		eventList = append(eventList, birthEvent)
+	}
+
+	defer func(rows *sql.Rows) {
+		err = rows.Close()
+		if err != nil {
+			r.logger.Error().Err(err).Msg("Не удалось закрыть соединение")
+		}
+	}(rows)
 
 	return eventList, nil
 }

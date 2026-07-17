@@ -30,6 +30,7 @@ type Config struct {
 	Database      Database `yaml:"database"`
 	CronRule      string   `yaml:"cronRule"`
 	TGBot         TGBot    `yaml:"tgbot"`
+	CronRule      string   `yaml:"cronRule"`
 }
 
 func GetConfigInstance() *Config {
