@@ -3,7 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -15,10 +19,6 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/notify"
 	"github.com/stanislavqq/birth_minder/internal/personstore"
 	"github.com/stanislavqq/birth_minder/internal/telegram"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 const day = time.Hour * 24
@@ -42,7 +42,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	if *debug {
-		fmt.Println("Debug mode on")
+		logger.Info().Msg("Debug mode on")
 		cfg.Debug = true
 	}
 
@@ -80,6 +80,8 @@ func main() {
 		job.Run()
 		cronRule = "@every 1m"
 	}
+
+	logger.Info().Msg("Cron runed: " + cronRule)
 
 	_, err := c.AddFunc(cronRule, func() {
 		job.Run()

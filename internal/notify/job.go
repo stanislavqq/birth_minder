@@ -2,11 +2,12 @@ package notify
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
-	bevent "github.com/stanislavqq/birth_minder/internal/model/bevent"
 	"math"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog"
+	bevent "github.com/stanislavqq/birth_minder/internal/model/bevent"
 )
 
 type FindNotifyJob struct {
@@ -66,11 +67,15 @@ func makeNotify(event bevent.BirthEvent, interval time.Duration, formatMessage s
 	if formatMessage == "${FORMAT_MESSAGE}" || formatMessage == "" {
 		formatMessage = "🎉🎉🎉 \nНапоминание: \n\n Скоро днюха!\n {fullname} :: {soon_time}"
 	}
+
+	date := time.Date(0, time.Month(event.Month), int(event.Day), 0, 0, 0, 0, &time.Location{})
+
 	msg := parseFormatMessage(formatMessage, map[string]string{
 		"fullname":  event.GetFullName(),
 		"firstname": event.FirstName,
 		"lastname":  event.LastName,
 		"soon_time": afterTime,
+		"date":      date.Format("2 January"),
 	})
 
 	//msg := fmt.Sprintf("🎉🎉🎉Напоминание: \n\n У %s - %s будет День рождения.", event.GetFullName(), afterTime)
