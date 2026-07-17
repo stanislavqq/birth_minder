@@ -1,6 +1,8 @@
 debug: ${DEBUG_MODE|false}
 formatMessage: "🎂 ДР {fullname} | {soon_time} \n\n📆 {date}"
 
+cronRule: "0 10 * * *"
+
 database:
   enabled: true
   host: ${DB_HOST}

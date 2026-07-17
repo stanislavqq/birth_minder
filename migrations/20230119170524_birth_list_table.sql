@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE birth_list (
-    id  serial primary key,
+    id  int primary key auto_increment,
     firstname varchar(50) not null,
     lastname varchar(50) not null,
     day int not null,

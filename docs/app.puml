@@ -6,10 +6,17 @@
 System_Ext(tg, "Telegram Bot", $sprite="robot")
 Person(p, "User")
 ContainerDb(storage, "Storage")
-Component(api, "API")
-Component(scheduler, "Scheduler")
-Component(birth_rep, "BirthUsersRepository ")
-Component(notifier, "Сервис опещения")
+Boundary(app, "app") {
+    Container(auth, "Auth")
+    Component(api, "API")
+    Component(scheduler, "Scheduler", "cron")
+    Component(birth_rep, "BirthUsersRepository ")
+    Component(notifier, "Сервис опещения")
+
+    Component(rules_rep, "ScheduleRules Repository")
+    Component(user_rep, "User Repository")
+}
+
 
 Rel(p, api, "Добавление записей др / Настройки расписания др")
 Rel(api, birth_rep, "")
@@ -18,5 +25,12 @@ Rel(birth_rep, storage, "Запись/Чтение ДР")
 Rel(scheduler, birth_rep, "Чтение др")
 Rel(scheduler, notifier, "Оповещение о ближайшем ДР")
 Rel(notifier, tg, "Отправка осообщения")
+
+Rel(api, auth, "Проверка полномочий")
+Rel(api, rules_rep, "")
+Rel(rules_rep, storage, "")
+
+Rel(api, user_rep, "")
+Rel(user_rep, storage, "")
 
 @enduml
