@@ -4,6 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
+
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -15,11 +21,6 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/notify"
 	"github.com/stanislavqq/birth_minder/internal/personstore"
 	"github.com/stanislavqq/birth_minder/internal/telegram"
-	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
-	"time"
 )
 
 const day = time.Hour * 24
@@ -111,8 +112,8 @@ func main() {
 		logger.Error().Err(err).Msg("Не удалось запустить воркер")
 	}
 
-	cmdController := telegram2.NewCommandController(cfg.TGBot, cfg.Debug, logger)
-	cmdController.HandleCommandFunc("event", func(sender telegram2.MessageSender) {
+	cmdController := telegram.NewCommandController(cfg.TGBot, cfg.Debug, logger)
+	cmdController.HandleCommandFunc("event", func(sender telegram.MessageSender) {
 		t := time.Now()
 
 		vday := t.Day()

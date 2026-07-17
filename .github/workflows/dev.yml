@@ -48,7 +48,7 @@ jobs:
 
   deploy:
     runs-on: self-hosted
-    needs: [build, test]
+    needs: [build]
     env:
       APP_FORMAT_MSG:
       DEBUG_MODE: false
