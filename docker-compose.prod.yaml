@@ -1,21 +1,22 @@
-version: '3.9'
-
 services:
-  app:
-    build:
-      context: .
-    working_dir: /application
+  mariadb:
+    image: mariadb:latest
+    ports:
+      - 3306:3306
     environment:
-      DEBUG_MODE: true
-      HOST: $DB_HOST
-      NAME: $DB_NAME
-      PORT: $DB_PORT
-      USER: $DB_USER
-      PASSWORD: $DB_PASSWORD
-      BOT_TOKEN: $TG_TOKEN
-      BOT_NOTIFYCHAT: $TG_CHAT_ID
-      CRON_RULE: "* * * * *"
+      MARIADB_USER: dev_user
+      MARIADB_PASSWORD: dev_user
+      MARIADB_DATABASE: bminder
+      MARIADB_ROOT_PASSWORD: dev
+
     volumes:
-        - ./app:/application
-    command: > 
-       /bin/sh -c "go mod download && go run cmd/birth_minder/main.go"
+      - mysqldata:/var/lib/mysql
+
+volumes:
+  mysqldata:
+
+# docker network create --subnet 120.18.0.0/16  --ip-range 120.18.5.0/24  --gateway 120.18.0.1 dev
+networks:
+  default:
+    name: dev
+    external: true
