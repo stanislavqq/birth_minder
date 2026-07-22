@@ -28,8 +28,8 @@ type Config struct {
 	Debug         bool     `yaml:"debug"`
 	FormatMessage string   `yaml:"formatMessage"`
 	Database      Database `yaml:"database"`
-	TGBot         TGBot    `yaml:"tgbot"`
 	CronRule      string   `yaml:"cronRule"`
+	TGBot         TGBot    `yaml:"tgbot"`
 }
 
 func GetConfigInstance() *Config {

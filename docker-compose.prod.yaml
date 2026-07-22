@@ -1,0 +1,22 @@
+services:
+  mariadb:
+    image: mariadb:latest
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_USER: dev_user
+      MARIADB_PASSWORD: dev_user
+      MARIADB_DATABASE: bminder
+      MARIADB_ROOT_PASSWORD: dev
+
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+volumes:
+  mysqldata:
+
+# docker network create --subnet 120.18.0.0/16  --ip-range 120.18.5.0/24  --gateway 120.18.0.1 dev
+networks:
+  default:
+    name: dev
+    external: true

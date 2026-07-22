@@ -3,6 +3,7 @@ module github.com/stanislavqq/birth_minder
 go 1.21.0
 
 require (
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/gookit/config/v2 v2.1.8
 	github.com/gookit/goutil v0.5.15
@@ -16,7 +17,6 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/gookit/color v1.5.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect

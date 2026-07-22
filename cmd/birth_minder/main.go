@@ -3,11 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
+	"fmt"
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -19,6 +15,10 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/notify"
 	"github.com/stanislavqq/birth_minder/internal/personstore"
 	"github.com/stanislavqq/birth_minder/internal/telegram"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 const day = time.Hour * 24
@@ -36,6 +36,8 @@ func main() {
 
 	cfg := config.GetConfigInstance()
 	logger := log.With().Logger()
+
+	logger.Info().Msgf("Init app with = debug_mode: %s; cron: %s; message_format: %s", cfg.Debug, cfg.CronRule, cfg.FormatMessage)
 
 	ctx := context.Background()
 	quit := make(chan os.Signal, 1)
@@ -109,6 +111,32 @@ func main() {
 	if err != nil {
 		logger.Error().Err(err).Msg("Не удалось запустить воркер")
 	}
+
+	cmdController := telegram.NewCommandController(cfg.TGBot, cfg.Debug, logger)
+	cmdController.HandleCommandFunc("event", func(sender telegram.MessageSender) {
+		t := time.Now()
+
+		vday := t.Day()
+		vmonth := int(t.Month())
+
+		list, err := rep.GetUpcomingBDay(vday, vmonth)
+		if err != nil {
+			logger.Error().Err(err).Msg("Ошибка получения близжайших событий")
+		}
+
+		msg := "Ближайшие дни рождения в этом месяце: \n\n"
+		if len(list) == 0 {
+			msg = "Ближайшие дни рождения отсутствуют. \n\n"
+		}
+
+		for _, v := range list {
+			msg += v.GetFullName() + " - "
+			msg += strconv.Itoa(int(v.Day)) + "." + strconv.Itoa(int(v.Month)) + "\n"
+		}
+
+		sender.SendTextToChat(int64(cfg.TGBot.NotifyChat), msg)
+	})
+	cmdController.Start()
 
 	select {
 	case v := <-quit:
