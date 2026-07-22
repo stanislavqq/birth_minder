@@ -3,7 +3,12 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
+
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -15,10 +20,6 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/notify"
 	"github.com/stanislavqq/birth_minder/internal/personstore"
 	"github.com/stanislavqq/birth_minder/internal/telegram"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 const day = time.Hour * 24
