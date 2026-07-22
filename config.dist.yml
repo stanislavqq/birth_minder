@@ -1,5 +1,7 @@
 debug: ${DEBUG_MODE|false}
-formatMessage: ${FORMAT_MESSAGE}
+formatMessage: "🎂 ДР {fullname} | {soon_time} \n\n📆 {date}"
+
+cronRule: "0 10 * * *"
 
 database:
   enabled: true
@@ -10,7 +12,7 @@ database:
   password: ${DB_PASS}
   migrations: migrations
   sslmode: disable
-  driver: postgres
+  driver: mysql
 
 tgbot:
   token: ${TG_TOKEN}

@@ -3,7 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/pressly/goose/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -15,10 +19,6 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/notify"
 	"github.com/stanislavqq/birth_minder/internal/personstore"
 	"github.com/stanislavqq/birth_minder/internal/telegram"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 const day = time.Hour * 24
@@ -42,7 +42,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	if *debug {
-		fmt.Println("Debug mode on")
+		logger.Info().Msg("Debug mode on")
 		cfg.Debug = true
 	}
 
@@ -50,7 +50,7 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	db, dbErr := database.NewDatabase(cfg.Database, logger)
+	db, dbErr := database.NewMysql(cfg.Database, logger)
 	if dbErr != nil {
 		log.Fatal().Err(dbErr).Msg("Ошибка подключения к БД")
 	}
@@ -62,7 +62,7 @@ func main() {
 	}
 
 	if *migrations {
-		if gooseError := goose.Up(db.DB, cfg.Database.Migrations); gooseError != nil {
+		if gooseError := goose.Up(db, cfg.Database.Migrations); gooseError != nil {
 			log.Fatal().Err(gooseError).Msg("Ошибка выполнения миграции")
 		}
 		return
@@ -74,12 +74,19 @@ func main() {
 	rep := bevent.NewRepository(db, logger)
 	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
 
-	cronRule := "0 0 9 * * "
+	var cronRule string
+	if len(cfg.CronRule) > 0 {
+		cronRule = cfg.CronRule
+	} else {
+		cronRule = "0 10 * * * "
+	}
 
 	if cfg.Debug {
 		job.Run()
 		cronRule = "@every 1m"
 	}
+
+	logger.Info().Msg("Cron runed: " + cronRule)
 
 	_, err := c.AddFunc(cronRule, func() {
 		job.Run()
@@ -90,7 +97,7 @@ func main() {
 	defer c.Stop()
 	c.Start()
 
-	perStore := personstore.New(db.DB, logger)
+	perStore := personstore.New(db, logger)
 
 	if err := server.NewServer(perStore).Start(cfg, ctx, logger); err != nil {
 		logger.Error().Err(err).Msg("Ошибка старта http сервера")
