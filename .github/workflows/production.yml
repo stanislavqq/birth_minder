@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: build-files
-          path: ${{ env.BUILD_PATH }}
+          path: /app/bin
 
   deploy:
     runs-on: ubuntu-latest
@@ -57,16 +57,13 @@ jobs:
           cat test.txt
 
       - name: Deploy to prod server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/scp-action@v1
         with:
           key: ${{ secrets.SSH_SECRET_KEY }}
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          debug: true
-          envs: TEST=test
-          script: |
-            cd /app/bminder
-            ls -la
+          source: "/app/bin/bminder"
+          target: "/app/bminder/bin/"
 
       - name: Restart service
         run: sudo systemctl restart ${{ env.BUILD_APP_NAME }}
