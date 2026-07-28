@@ -59,7 +59,7 @@ jobs:
       - name: Deploy to prod server
         uses: appleboy/ssh-action@master
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_SECRET_KEY }}
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           debug: true
