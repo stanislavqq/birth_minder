@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DEPLOY_PATH: /home/${{ secrets.REMOTE_USER }}/application
+  DEPLOY_PATH: /app/bminder
   BUILD_PATH: bin
   BUILD_APP_NAME: bminder
 
@@ -15,7 +15,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: start build notify
+        run: |
+          curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Начал сборку bminder on prod" -d "chat_id=${{ secrets.CHAT_ID }}"
+
+      - uses: actions/checkout@v7
       - name: tests
         run: ls ~ -la && ls ../ -la
 
@@ -38,24 +42,30 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
+      - name: start deploy notify
+        run: |
+          curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Начал деплой bminder on prod" -d "chat_id=${{ secrets.CHAT_ID }}"
+
       - name: Download build files
         uses: actions/download-artifact@v5
         with:
           name: build-files
 
       - name: Deploy to prod server
-        uses: easingthemes/ssh-deploy@main
+        uses: appleboy/ssh-action@master
         env:
           TEST: "test"
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "./"
-          SCRIPT_BEFORE: |
-            whoami
-            ls -al
-          SCRIPT_AFTER: |
-            whoami
-            ls -al
-            echo $RSYNC_STDOUT
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          script: |
+            cd /app/bminder
+            ls -la
+
+      - name: Restart service
+        run: sudo systemctl restart ${{ env.BUILD_APP_NAME }}
+
+      - name: success message
+        run: |
+          curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Деплой bminder завершен" -d "chat_id=${{ secrets.CHAT_ID }}"
