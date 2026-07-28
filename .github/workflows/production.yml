@@ -24,7 +24,7 @@ jobs:
         run: ls ~ -la && ls ../ -la
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v7
         with:
           go-version: 1.26.5
           cache: true
@@ -50,6 +50,9 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: build-files
+
+      - name: test
+        run: echo ${{ secrets.SERVER_IP }}
 
       - name: Deploy to prod server
         uses: appleboy/ssh-action@master
