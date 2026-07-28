@@ -15,10 +15,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: start build notify
-        run: |
-          curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Начал сборку bminder on prod" -d "chat_id=${{ secrets.CHAT_ID }}"
-
       - uses: actions/checkout@v7
 
       - name: Set up Go
@@ -28,7 +24,7 @@ jobs:
           cache: true
 
       - name: Build
-        run: go mod download && CGO_ENABLED=0 go build -o ./bin/bminder ./cmd/birth_minder/main.go
+        run: go mod download && CGO_ENABLED=0 go build -o bin/bminder cmd/birth_minder/main.go
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
@@ -40,9 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - name: start deploy notify
-        run: |
-          curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Начал деплой bminder on prod" -d "chat_id=${{ secrets.CHAT_ID }}"
+      - uses: actions/checkout@v7
 
       - name: Download build files
         uses: actions/download-artifact@v7
@@ -57,19 +51,14 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           debug: true
-          source: "bin/bminder"
+          source: "bin/*"
           target: "/app/bminder/bin/"
 
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_SECRET_KEY }}
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
           script: |
             sudo systemctl restart bminder.service
-
-      - name: success message
-        run: |
-          curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Деплой bminder завершен" -d "chat_id=${{ secrets.CHAT_ID }}"
