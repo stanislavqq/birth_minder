@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"os"
 	"os/signal"
@@ -56,6 +57,11 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
+	if _, err := os.Stat(cfg.Database.Sqlite.Path); err == nil {
+
+	} else if errors.Is(err, os.ErrNotExist) {
+		log.Error().Err(err).Msg("Файл бд не найден")
+	}
 	//db, dbErr := database.NewMysql(cfg.Database, logger)
 	db, dbErr := database.NewSqlite(cfg.Database, logger)
 	defer db.Close()
@@ -134,7 +140,7 @@ func main() {
 
 		msg := "Ближайшие дни рождения в этом месяце: \n\n"
 		if len(list) == 0 {
-			msg = "Ближайшие дни рождения отсутствуют. \n\n"
+			msg = "Ближайшие дни рождения отсутствуют... \n\n"
 		}
 
 		for _, v := range list {
