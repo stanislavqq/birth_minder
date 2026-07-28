@@ -8,7 +8,8 @@ import (
 	"github.com/stanislavqq/birth_minder/internal/config"
 )
 
-func NewPostgres(cfg config.Database, logger zerolog.Logger) (*sqlx.DB, error) {
+func NewPostgres(databaseCfg config.Database, logger zerolog.Logger) (*sqlx.DB, error) {
+	cfg := databaseCfg.Postgres
 	dsn := fmt.Sprintf("host=%v port=%v user=%v password=%v dbname=%v sslmode=%v",
 		cfg.Host,
 		cfg.Port,
@@ -18,7 +19,7 @@ func NewPostgres(cfg config.Database, logger zerolog.Logger) (*sqlx.DB, error) {
 		cfg.SslMode,
 	)
 
-	db, err := sqlx.Open(cfg.Driver, dsn)
+	db, err := sqlx.Open(databaseCfg.Driver, dsn)
 	if err != nil {
 		logger.Error().Err(err).Msg("Ошибка с соединением с базой данных pgsql")
 		return nil, err

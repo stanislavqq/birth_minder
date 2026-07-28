@@ -8,15 +8,36 @@ import (
 var cfg *Config
 
 type Database struct {
-	Enabled    bool   `yaml:"enabled"`
-	Host       string `yaml:"host"`
-	Port       string `yaml:"port"`
-	User       string `yaml:"user"`
-	Password   string `yaml:"password"`
-	Migrations string `yaml:"migrations"`
-	Name       string `yaml:"name"`
-	SslMode    string `yaml:"sslmode"`
-	Driver     string `yaml:"driver"`
+	Migrations string   `yaml:"migrations"`
+	Driver     string   `yaml:"driver"`
+	Mysql      Mysql    `yaml:"mysql"`
+	Sqlite     Sqlite   `yaml:"sqlite"`
+	Postgres   Postgres `yaml:"postgres"`
+}
+
+type Postgres struct {
+	Enabled  bool   `yaml:"enabled"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Name     string `yaml:"name"`
+	SslMode  string `yaml:"sslmode"`
+}
+
+type Mysql struct {
+	Enabled  bool   `yaml:"enabled"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Name     string `yaml:"name"`
+	SslMode  string `yaml:"sslmode"`
+}
+
+type Sqlite struct {
+	Enabled bool   `yaml:"enabled"`
+	Path    string `yaml:"path"`
 }
 
 type TGBot struct {

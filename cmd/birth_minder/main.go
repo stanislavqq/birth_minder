@@ -42,7 +42,11 @@ func main() {
 
 	ctx := context.Background()
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(quit, os.Interrupt)
+	go func() {
+		<-quit
+		os.Exit(0)
+	}()
 
 	if *debug {
 		logger.Info().Msg("Debug mode on")
@@ -53,7 +57,10 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	db, dbErr := database.NewMysql(cfg.Database, logger)
+	//db, dbErr := database.NewMysql(cfg.Database, logger)
+	db, dbErr := database.NewSqlite(cfg.Database, logger)
+	defer db.Close()
+
 	if dbErr != nil {
 		log.Fatal().Err(dbErr).Msg("Ошибка подключения к БД")
 	}
@@ -68,6 +75,7 @@ func main() {
 		if gooseError := goose.Up(db, cfg.Database.Migrations); gooseError != nil {
 			log.Fatal().Err(gooseError).Msg("Ошибка выполнения миграции")
 		}
+		db.Close()
 		return
 	}
 
@@ -89,7 +97,7 @@ func main() {
 		cronRule = "@every 1m"
 	}
 
-	logger.Info().Msg("Cron runed: " + cronRule)
+	logger.Info().Msg("Cron launched with rule: " + cronRule)
 
 	_, err := c.AddFunc(cronRule, func() {
 		job.Run()
@@ -136,6 +144,10 @@ func main() {
 		}
 
 		sender.SendTextToChat(int64(cfg.TGBot.NotifyChat), msg)
+	})
+
+	cmdController.HandleCommandFunc("stop", func(sender telegram.MessageSender) {
+		//os.Exit(0)
 	})
 	cmdController.Start()
 

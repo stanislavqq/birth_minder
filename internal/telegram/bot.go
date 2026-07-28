@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"time"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog"
 )
@@ -10,17 +12,28 @@ type MessageSender interface {
 }
 
 type TelegramBot struct {
-	botapi tgbotapi.BotAPI
+	botapi *tgbotapi.BotAPI
 	logger *zerolog.Logger
 }
 
 func NewBot(token string, logger *zerolog.Logger) (TelegramBot, error) {
-	bot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		return TelegramBot{}, err
-	}
+	interval := time.Second
+	var bot *tgbotapi.BotAPI
+	var err error
 
-	return TelegramBot{botapi: *bot, logger: logger}, nil
+	for attempt := 0; attempt < 5; attempt++ {
+		logger.Info().Int("attempt", attempt).Msg("Попытка создать бота")
+		bot, err = tgbotapi.NewBotAPI(token)
+		if err == nil {
+			return TelegramBot{botapi: bot, logger: logger}, nil
+		}
+
+		time.Sleep(interval)
+		interval += time.Second
+	}
+	logger.Error().Err(err).Msg("Неудалось соединиться с телеграм ботом")
+	return TelegramBot{}, err
+	//return TelegramBot{botapi: bot, logger: logger}, nil
 }
 func (b *TelegramBot) SendTextToChat(ChatID int64, message string) (tgbotapi.Message, error) {
 	messageConf := tgbotapi.NewMessage(ChatID, message)

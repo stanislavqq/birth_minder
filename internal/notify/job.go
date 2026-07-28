@@ -2,11 +2,12 @@ package notify
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
-	bevent "github.com/stanislavqq/birth_minder/internal/model/bevent"
 	"math"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/stanislavqq/birth_minder/internal/model/bevent"
 )
 
 type FindNotifyJob struct {
@@ -44,7 +45,9 @@ func (j *FindNotifyJob) Run() {
 
 			for _, event := range eventList {
 				notify := makeNotify(event, interval, j.messageFormat)
-				go notifyToChan(notify, j.NotifyChan)
+				go func() {
+					j.NotifyChan <- notify
+				}()
 			}
 		}
 		eventList = bevent.BirthEvents{}
