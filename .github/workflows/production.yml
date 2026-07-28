@@ -30,8 +30,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: build-files
-          path: bin/bminder
-          archive: false
+          path: bin
+#          archive: false
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
         uses: actions/download-artifact@v7
         id: test
         with:
-          name: bminder
+          name: build-files
           path: dist
 
       - name: Deploy to prod server
