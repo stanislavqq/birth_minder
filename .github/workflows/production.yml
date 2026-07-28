@@ -20,8 +20,6 @@ jobs:
           curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Начал сборку bminder on prod" -d "chat_id=${{ secrets.CHAT_ID }}"
 
       - uses: actions/checkout@v7
-      - name: tests
-        run: ls ~ -la && ls ../ -la
 
       - name: Set up Go
         uses: actions/setup-go@v7
@@ -30,13 +28,13 @@ jobs:
           cache: true
 
       - name: Build
-        run: go mod download && CGO_ENABLED=0 go build -o ./bin/${{ env.BUILD_APP_NAME }} ./cmd/birth_minder/main.go
+        run: go mod download && CGO_ENABLED=0 go build -o ./bin/bminder ./cmd/birth_minder/main.go
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
           name: build-files
-          path: dist
+          path: bin
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,7 +56,7 @@ jobs:
           key: ${{ secrets.SSH_SECRET_KEY }}
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          source: "dist/*"
+          source: "bin/*"
           target: "/app/bminder/bin/"
 
       - name: Restart service
