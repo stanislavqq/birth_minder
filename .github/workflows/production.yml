@@ -44,7 +44,7 @@ jobs:
         id: test
         with:
           name: build-files
-          path: dist
+          path: .
 
       - name: Deploy to prod server
         uses: appleboy/scp-action@v1
@@ -53,7 +53,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           overwrite: true
-          source: dist/*
+          source: ./*
           target: /app/bminder/bin/
 
       - name: Restart service
