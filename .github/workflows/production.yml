@@ -48,7 +48,7 @@ jobs:
 
       - name: Download build files
         uses: actions/download-artifact@v7
-        id: ${{ github.event.workflow_run.id }}
+        id: test
         with:
           name: build-files
 
