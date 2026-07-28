@@ -52,7 +52,9 @@ jobs:
           name: build-files
 
       - name: test
-        run: echo ${{ secrets.SERVER_IP }}
+        run: | 
+          echo ${{ secrets.SERVER_IP }} > test.txt
+          cat test.txt
 
       - name: Deploy to prod server
         uses: appleboy/ssh-action@master
