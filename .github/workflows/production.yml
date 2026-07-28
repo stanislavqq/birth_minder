@@ -33,7 +33,7 @@ jobs:
         run: go mod download && CGO_ENABLED=0 go build -o ./bin/${{ env.BUILD_APP_NAME }} ./cmd/birth_minder/main.go
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-files
           path: ${{ env.BUILD_PATH }}
@@ -47,7 +47,7 @@ jobs:
           curl https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendMessage -d "text=Начал деплой bminder on prod" -d "chat_id=${{ secrets.CHAT_ID }}"
 
       - name: Download build files
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: build-files
 
@@ -56,12 +56,12 @@ jobs:
 
       - name: Deploy to prod server
         uses: appleboy/ssh-action@master
-        env:
-          TEST: "test"
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
+          debug: true
+          envs: TEST=test
           script: |
             cd /app/bminder
             ls -la
