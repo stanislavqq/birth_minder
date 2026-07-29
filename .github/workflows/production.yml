@@ -54,7 +54,7 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           overwrite: true
           source: ./bminder
-          target: /app/bminder/bin/bminder.new
+          target: /app/bminder/bin/upd
 
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
@@ -64,5 +64,5 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           script: |
             cd /app/bminder/bin
-            mv bminder.new bminder
+            mv upd/bminder bminder
             sudo systemctl restart bminder.service
