@@ -63,6 +63,4 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           script: |
-            cd /app/bminder/bin
-            mv upd/bminder bminder
-            sudo systemctl restart bminder.service
+            sudo /bin/bash /app/bminder/update.sh
