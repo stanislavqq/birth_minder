@@ -68,7 +68,7 @@ func (s *Server) Start(cfg *config.Config, ctx context.Context, logger zerolog.L
 	logger.Info().Msg("Инициализация http сервера")
 	srv := &http.Server{
 		Handler: r,
-		Addr:    "127.0.0.1:3333",
+		Addr:    "0.0.0.0:3333",
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
