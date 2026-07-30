@@ -40,7 +40,7 @@ func main() {
 
 	logger.Info().Msgf("Init app with = debug_mode: %s; cron: %s; message_format: %s", cfg.Debug, cfg.CronRule, cfg.FormatMessage)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	go func() {
@@ -152,7 +152,7 @@ func main() {
 	})
 
 	cmdController.HandleCommandFunc("stop", func(sender telegram.MessageSender) {
-		//os.Exit(0)
+		cancel()
 	})
 	cmdController.Start()
 
