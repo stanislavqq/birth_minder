@@ -63,7 +63,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           script: |
-            mv /app/bminder/bin/upd/config.dist /app/bminder/config.yml
+            mv /app/bminder/bin/upd/config.dist.yml /app/bminder/config.yml
             touch /app/bminder/.env
             echo TG_CHAT_ID=${{ secrets.TG_CHAT_ID }} > /app/bminder/.env
             echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> /app/bminder/.env
