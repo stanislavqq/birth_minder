@@ -46,6 +46,11 @@ jobs:
           name: build-files
           path: .
 
+
+      - name: test
+        run: |
+          ls -la
+
       - name: Deploy to prod server
         uses: appleboy/scp-action@v1
         with:
@@ -56,6 +61,7 @@ jobs:
           source: "./bminder,config.dist"
           target: /app/bminder/bin/upd
 
+
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -65,8 +71,8 @@ jobs:
           script: |
             mv /app/bminder/bin/upd/config.dist.yml /app/bminder/config.yml
             touch /app/bminder/.env
-            echo TG_CHAT_ID=${{ secrets.TG_CHAT_ID }} > /app/bminder/.env
-            echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> /app/bminder/.env
-            echo SQLITE_PATH=${{ secrets.SQLITE_PATH }} >> /app/bminder/.env
-            echo SCHEDULE_RULE=${{ vars.SCHEDULE_RULE }} >> /app/bminder/.env
+            echo "TG_CHAT_ID=${{ secrets.TG_CHAT_ID }}" > /app/bminder/.env
+            echo "TG_TOKEN=${{ secrets.TG_TOKEN }}" >> /app/bminder/.env
+            echo "SQLITE_PATH=${{ secrets.SQLITE_PATH }}" >> /app/bminder/.env
+            echo "SCHEDULE_RULE=${{ vars.SCHEDULE_RULE }}" >> /app/bminder/.env
             sudo /bin/bash /app/bminder/update.sh
