@@ -153,6 +153,7 @@ func main() {
 	})
 
 	cmdController.HandleCommandFunc("stop", func(sender telegram.MessageSender) {
+		sender.SendTextToChat(int64(cfg.TGBot.NotifyChat), "🤡 останавливаю приложение")
 		cancel()
 	})
 	cmdController.Start()
