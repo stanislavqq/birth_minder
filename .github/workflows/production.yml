@@ -53,7 +53,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           overwrite: true
-          source: ./bminder
+          source: "./bminder,config.dist"
           target: /app/bminder/bin/upd
 
       - name: Restart service
@@ -63,4 +63,10 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           script: |
+            mv /app/bminder/bin/upd/config.dist /app/bminder/config.yml
+            touch /app/bminder/.env
+            echo TG_CHAT_ID=${{ secrets.TG_CHAT_ID }} > /app/bminder/.env
+            echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> /app/bminder/.env
+            echo SQLITE_PATH=${{ secrets.SQLITE_PATH }} >> /app/bminder/.env
+            echo SCHEDULE_RULE=${{ env.SCHEDULE_RULE }} >> /app/bminder/.env
             sudo /bin/bash /app/bminder/update.sh
