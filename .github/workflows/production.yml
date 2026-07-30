@@ -58,7 +58,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           overwrite: true
-          source: "./bminder,config.dist"
+          source: "./bminder,config.dist.yml"
           target: /app/bminder/bin/upd
 
 
