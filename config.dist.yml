@@ -1,18 +1,22 @@
 debug: ${DEBUG_MODE|false}
 formatMessage: "🎂 ДР {fullname} | {soon_time} \n\n📆 {date}"
 
-cronRule: ${CROM_RULE}
+cronRule: ${SCHEDULE_RULE}
 
 database:
-  enabled: true
-  host: ${DB_HOST}
-  name: ${DB_NAME}
-  port: ${DB_PORT}
-  user: ${DB_USER}
-  password: ${DB_PASS}
   migrations: migrations
-  sslmode: disable
   driver: mysql
+  mysql:
+    enabled: true
+    host: ${DB_HOST}
+    name: ${DB_NAME}
+    port: ${DB_PORT}
+    user: ${DB_USER}
+    password: ${DB_PASS}
+    sslmode: disable
+  sqlite:
+    enabled: true
+    path: ${SQLITE_PATH}
 
 tgbot:
   token: ${TG_TOKEN}

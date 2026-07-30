@@ -1,8 +1,11 @@
 package config
 
 import (
+	"log"
+
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yamlv3"
+	"github.com/joho/godotenv"
 )
 
 var cfg *Config
@@ -64,6 +67,10 @@ func GetConfigInstance() *Config {
 func ReadConfigYML(configYML string) error {
 	if cfg != nil {
 		return nil
+	}
+
+	if err := godotenv.Load("./.env"); err != nil {
+		log.Println("Предупреждение: .env файл не найден, берутся системные переменные")
 	}
 
 	config.WithOptions(config.ParseEnv)
