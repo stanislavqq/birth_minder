@@ -24,6 +24,7 @@ import (
 
 const day = time.Hour * 24
 const week = day * 7
+const month = day * 30
 
 func main() {
 	migrations := flag.Bool("migration", false, "Define migrations start option")
@@ -88,7 +89,7 @@ func main() {
 
 	c := cron.New()
 	rep := bevent.NewRepository(db, logger)
-	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week}, notifyCollector, cfg.Debug, logger)
+	job := notify.NewJob(rep, cfg.FormatMessage, []time.Duration{day, week, month}, notifyCollector, cfg.Debug, logger)
 
 	var cronRule string
 	if len(cfg.CronRule) > 0 {
